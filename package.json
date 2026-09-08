@@ -1,0 +1,46 @@
+{
+  "name": "@francofantomius/jellyfin",
+  "version": "0.1.0",
+  "description": "A lightweight, modular, and type-safe Jellyfin SDK for Node.js and the Browser.",
+  "author": "Franco Fantomius",
+  "license": "MIT",
+  "keywords": [
+    "jellyfin",
+    "sdk",
+    "client",
+    "media",
+    "music",
+    "api",
+    "streaming"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "tsup": "^8.3.6",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.5"
+  }
+}
