@@ -8,6 +8,11 @@ import { MediaModule } from './media.js';
 import { LyricsModule } from './lyrics.js';
 import { FavoritesModule } from './favorites.js';
 import { OfflineStorageManager } from './offline.js';
+import { ResumeModule } from './resume.js';
+import { NextUpModule } from './next-up.js';
+import { LatestModule } from './latest.js';
+import { TranscodeModule } from './transcode.js';
+import { SearchModule } from './search.js';
 import { CacheAdapter, MemoryCacheAdapter } from './cache.js';
 import { generateDeviceId, getDefaultStorage } from './storage.js';
 import type { ClientInfo, JellyfinClientOptions, StorageAdapter } from './types.js';
@@ -19,12 +24,17 @@ export class JellyfinClient {
   public readonly auth: AuthModule;
   public readonly system: SystemModule;
   public readonly library: LibraryModule;
+  public readonly search: SearchModule;
   public readonly playlists: PlaylistsModule;
   public readonly playback: PlaybackModule;
   public readonly media: MediaModule;
   public readonly lyrics: LyricsModule;
   public readonly favorites: FavoritesModule;
   public readonly offline: OfflineStorageManager;
+  public readonly resume: ResumeModule;
+  public readonly nextUp: NextUpModule;
+  public readonly latest: LatestModule;
+  public readonly transcode: TranscodeModule;
 
   private http: HttpTransport;
   private storage: StorageAdapter;
@@ -38,7 +48,7 @@ export class JellyfinClient {
 
     this.clientInfo = {
       name: options.clientInfo?.name || '@francofantomius/jellyfin',
-      version: options.clientInfo?.version || '0.1.0',
+      version: options.clientInfo?.version || '0.2.0',
       device: options.clientInfo?.device || (typeof window !== 'undefined' ? 'Web Browser' : 'Node.js'),
       deviceId: options.clientInfo?.deviceId || generateDeviceId()
     };
@@ -57,6 +67,7 @@ export class JellyfinClient {
     });
 
     const getUserId = () => this.auth.getUserId();
+    const getDeviceId = () => this.clientInfo.deviceId;
 
     this.system = new SystemModule(this.http, {
       serverVersion: options.serverVersion,
@@ -64,12 +75,17 @@ export class JellyfinClient {
     });
     this.auth = new AuthModule(this.http, options.userId || '');
     this.library = new LibraryModule(this.http, getUserId);
+    this.search = new SearchModule(this.http, getUserId);
     this.playlists = new PlaylistsModule(this.http, getUserId);
     this.playback = new PlaybackModule(this.http);
     this.media = new MediaModule(this.http, getUserId);
     this.lyrics = new LyricsModule(this.http);
     this.favorites = new FavoritesModule(this.http, getUserId);
     this.offline = new OfflineStorageManager(this.media);
+    this.resume = new ResumeModule(this.http, getUserId);
+    this.nextUp = new NextUpModule(this.http, getUserId);
+    this.latest = new LatestModule(this.http, getUserId);
+    this.transcode = new TranscodeModule(this.http, getDeviceId);
   }
 
   // --- Configuration Getters & Setters ---

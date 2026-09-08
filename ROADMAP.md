@@ -4,7 +4,7 @@ This roadmap documents the current implementation status and planned features fo
 
 ---
 
-## 🟢 Currently Implemented Features (v0.1.0)
+## 🟢 Currently Implemented Features (v0.2.0)
 
 ### 1. Client Core & Infrastructure
 - **Unified SDK Client (`JellyfinClient`)**: Main client coordinating all modules with configurable options.
@@ -61,14 +61,14 @@ This roadmap documents the current implementation status and planned features fo
 
 Each feature will follow the SDK rule of being placed in its own dedicated source file.
 
-### Milestone 1: Dashboard, Continue Watching & Active Streams (v0.2.0)
-- [ ] **Resume / Continue Watching** (`src/user-views.ts` or `src/resume.ts`):
+### Milestone 1: Dashboard, Continue Watching & Active Streams (v0.2.0) [Completed]
+- [x] **Resume / Continue Watching** (`src/resume.ts`):
   - Support `/UserItems/Resume` to fetch items currently in-progress for the user.
-- [ ] **Next Up for TV Shows** (`src/next-up.ts`):
+- [x] **Next Up for TV Shows** (`src/next-up.ts`):
   - Support `/Shows/NextUp` to provide the next unplayed episode for followed series.
-- [ ] **Latest / Recently Added Media** (`src/latest.ts`):
+- [x] **Latest / Recently Added Media** (`src/latest.ts`):
   - Support `/Users/{userId}/Items/Latest` to query newly added movies, albums, and episodes per library view.
-- [ ] **Active Transcode Session Teardown** (`src/transcode.ts`):
+- [x] **Active Transcode Session Teardown** (`src/transcode.ts`):
   - Explicit session teardown via `/Videos/ActiveEncodings` on playback stop to avoid lingering server FFmpeg instances.
 
 ### Milestone 2: Real-time Communication & Remote Control (v0.3.0)

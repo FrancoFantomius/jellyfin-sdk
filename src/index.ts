@@ -14,6 +14,11 @@ export { LyricsModule } from './lyrics.js';
 export { FavoritesModule } from './favorites.js';
 export { OfflineStorageManager } from './offline.js';
 export type { DownloadRecord, DownloadProgress } from './offline.js';
+export { ResumeModule } from './resume.js';
+export { NextUpModule } from './next-up.js';
+export { LatestModule } from './latest.js';
+export { TranscodeModule } from './transcode.js';
+export { SearchModule, COMMON_SEARCH_FIELDS } from './search.js';
 
 export {
   VIDEO_QUALITY_PRESETS,
@@ -89,5 +94,9 @@ export type {
   SystemInfo,
   LyricLine,
   LyricsDto,
-  ClientCapabilities
+  ClientCapabilities,
+  GetResumeItemsOptions,
+  GetNextUpOptions,
+  GetLatestMediaOptions,
+  StopActiveEncodingOptions
 } from './types.js';

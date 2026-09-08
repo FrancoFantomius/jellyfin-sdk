@@ -1,0 +1,169 @@
+# @francofantomius/jellyfin
+
+> A lightweight, modular, and type-safe Jellyfin SDK for Node.js and the Browser.
+
+## Overview
+- Package: `@francofantomius/jellyfin`
+- Version: `0.2.0`
+- Target Environment: Universal / Isomorphic (Node.js 18+, Bun, Deno, modern Browsers)
+- Formats: Dual ESM (`dist/index.js`) and CJS (`dist/index.cjs`), with TypeScript type declarations (`dist/index.d.ts`).
+- License: MIT
+
+## Core Architecture
+- **JellyfinClient (`src/client.ts`)**: The unified entry point coordinating all modular client sub-modules.
+- **HttpTransport (`src/http.ts`)**: Fetch wrapper handling server URL sanitization, authentication headers (`Authorization`, `X-Emby-Authorization`), JSON/Blob/Text responses, and error bubbling.
+- **Error Hierarchy (`src/errors.ts`)**:
+  - `JellyfinError`: Base error class.
+  - `JellyfinApiError`: Returned when an HTTP request fails with a non-OK status. Includes `status` and `endpoint`.
+  - `JellyfinAuthError`: Specialization of API error for 401/403 responses.
+- **Pluggable Storage (`src/storage.ts`)**:
+  - `StorageAdapter` interface (`getItem`, `setItem`, `removeItem`).
+  - `MemoryStorage`: In-memory storage for headless/server runtimes.
+  - `LocalStorageAdapter`: Uses `window.localStorage` in browser runtimes.
+  - `getDefaultStorage()`: Auto-selects localStorage in browser, MemoryStorage in Node.
+  - `generateDeviceId()`: Generates random hex client device ID.
+- **Caching (`src/cache.ts`)**:
+  - `CacheAdapter` interface (`get`, `set`, `delete`, `clear`).
+  - `MemoryCacheAdapter`: SWR/TTL in-memory cache.
+  - `IndexedDBCacheAdapter`: Persistent browser IndexedDB cache.
+  - `fetchWithCache`: Helper performing Stale-While-Revalidate caching.
+
+## Modules & APIs
+
+### 1. Authentication (`client.auth` / `src/auth.ts`)
+- `authenticateByName(username, password)`: Login with username/password, stores credentials and token.
+- `reportCapabilities(capabilities?)`: Reports client playback capabilities (supports Jellyfin 12 `/Sessions/Capabilities/Full` and Jellyfin 10 `/Sessions/Capabilities`).
+- `getUserImageUrl(userId?, options?)`: Generates user profile avatar image URL.
+- `logout()`: Clears token and user ID.
+- `getUserId()` / `setUserId(id)`: User ID accessors.
+
+### 2. System Negotiation (`client.system` / `src/system.ts`)
+- `getPublicInfo()`: Query `/System/Info/Public` without authentication.
+- `getInfo()`: Query `/System/Info` (requires auth).
+- `detectVersion()`: Auto-detects server version and stores it on client.
+- `isV12()`: Returns `true` if connected Jellyfin server is version 12.0 or higher.
+- `getVersion()` / `setVersion(version)`: Server version accessors.
+- Utilities: `parseSemVer`, `isVersionAtLeast`, `isV12OrHigher`.
+
+### 3. Media Library Browsing (`client.library` / `src/library.ts`)
+- `getMusicLibraries()`: Returns music views for the user.
+- `getVideoLibraries()`: Returns video views (movies, tvshows, homevideos).
+- `getAlbums(options?)`: Query music albums (`/Users/{userId}/Items`).
+- `getArtists(options?)`: Query music artists.
+- `getSongs(options?)`: Query music tracks.
+- `getFavoriteSongs(options?)`: Query favorite music tracks.
+- `getMovies(options?)`: Query movies with genre/year/sort filters.
+- `getSeries(options?)`: Query TV series.
+- `getSeasons(seriesId, options?)`: Query seasons for a TV series (`/Shows/{seriesId}/Seasons`).
+- `getEpisodes(seriesId, seasonId, options?)`: Query episodes (`/Shows/{seriesId}/Episodes`).
+- `getVideos(options?)`: Query generic video items.
+- `getPlaybackInfo(itemId, options?)`: Queries `/Items/{itemId}/PlaybackInfo` to negotiate audio/subtitle streams, direct play compatibility, and live streams.
+- `getItem(itemId)`: Fetch single item details.
+- `search(query, options?)`: Search across library items with filtering by library view (`parentId`), item types (`includeItemTypes`), media types, genres, years, favorites, and sorting.
+
+### 4. Media Streaming, Subtitles & Artwork (`client.media` / `src/media.ts`)
+- `getAudioStreamUrl(itemId, options?)`: Direct or transcoded audio stream URL.
+- `getAudioHlsStreamUrl(itemId, options?)`: Audio HLS master playlist URL.
+- `getVideoStreamUrl(itemId, options?)`: Direct play (`static=true`) or transcoded progressive stream URL.
+- `getVideoHlsStreamUrl(itemId, options?)`: Adaptive HLS video playlist URL (`/Videos/{itemId}/master.m3u8`).
+- `getStreamHeaders()`: Returns `Authorization` and `X-Emby-Authorization` headers for players.
+- `getSubtitleUrl(itemId, mediaSourceId, index, options?)`: Subtitle stream URL (VTT/SRT).
+- `getSubtitles(itemId, mediaSourceId, index, options?)`: Fetches raw subtitle text.
+- `getSubtitleTracks(item)`: Extracts subtitle tracks from `BaseItemDto.MediaStreams`.
+- `getArtworkUrl(itemOrId, options?)`: Generates responsive image URL (Primary, Art, Backdrop, Banner, Logo, Thumb, Disc).
+- `getDownloadUrl(itemId, options?)`: Direct download URL for unmodified source file.
+- `downloadFile(itemId, options?)`: Streamed file download into a `Blob` with progress percentage callback.
+
+### 5. Playlists (`client.playlists` / `src/playlists.ts`)
+- `createPlaylist(options)`: Create playlist (Jellyfin 12 POST JSON body with query parameter fallback).
+- `getPlaylists()`: Retrieve user playlists.
+- `deletePlaylist(playlistId)`: Delete a playlist.
+- `getPlaylistItems(playlistId, options?)`: Query items inside a playlist.
+- `addTracks(playlistId, trackIds)`: Add items to playlist.
+- `removeTrack(playlistId, trackId)`: Remove item by item ID.
+- `removePlaylistItem(playlistId, playlistItemId)`: Remove entry by playlist entry ID.
+- `uploadPlaylistImage(playlistId, base64Data, mimeType)`: Upload custom playlist cover image.
+
+### 6. Playback Reporting (`client.playback` / `src/playback.ts`)
+- `reportStart(itemId, positionTicks?)`: Post `/Sessions/Playing` for scrobbling and state tracking.
+- `reportProgress(itemId, positionTicks?, isPaused?)`: Post `/Sessions/Playing/Progress`.
+- `reportStopped(itemId, positionTicks?, options?)`: Post `/Sessions/Playing/Stopped`. Accepts optional `{ playSessionId }` to automatically stop active server transcoding sessions.
+
+### 7. Synced Lyrics (`client.lyrics` / `src/lyrics.ts`)
+- `getLyrics(itemId)`: Queries `/Audio/{itemId}/Lyrics` returning timed lines or plain text.
+
+### 8. User Favorites (`client.favorites` / `src/favorites.ts`)
+- `markFavorite(itemId)`: Post `/UserFavoriteItems/{itemId}`.
+- `unmarkFavorite(itemId)`: Delete `/UserFavoriteItems/{itemId}`.
+
+### 9. Offline Storage Manager (`client.offline` / `src/offline.ts`)
+- Complete browser IndexedDB store for media blobs and metadata.
+- `isSupported()`: Checks for browser IndexedDB support.
+- `downloadItem(item, onProgress?, options?)`: Downloads item blob, artwork, and metadata to IndexedDB.
+- `downloadItems(items, onProgress?, options?)`: Batch download with aggregated progress.
+- `getDownloadedBlob(itemId)`: Retrieves raw media Blob from storage.
+- `getDownloadedBlobUrl(itemId)`: Creates object URL for offline playback.
+- `isItemDownloaded(itemId)`: Checks if item exists in offline storage.
+- `removeDownload(itemId)`: Deletes item from offline storage.
+- `getAllDownloads()`: Lists all offline records.
+- `clearAllDownloads()`: Clears offline storage.
+
+### 10. Continue Watching / Resume (`client.resume` / `src/resume.ts`)
+- Endpoint: `GET /UserItems/Resume`
+- `getResumeItems(options?)` / `getItems(options?)`: Queries items currently in-progress for the user.
+- Options: `userId`, `limit`, `startIndex`, `parentId`, `mediaTypes`, `enableImages`, `enableUserData`, `imageTypeLimit`, `enableImageTypes`, `fields`.
+
+### 11. Next Up for TV Shows (`client.nextUp` / `src/next-up.ts`)
+- Endpoint: `GET /Shows/NextUp`
+- `getNextUp(options?)` / `getEpisodes(options?)`: Retrieves the next unplayed episodes for followed series.
+- Options: `userId`, `seriesId`, `parentId`, `limit`, `startIndex`, `fields`, `enableImages`, `enableUserData`, `enableTotalRecordCount`, `disableFirstEpisode`, `nextUpDateCutoff`.
+
+### 12. Recently Added / Latest Media (`client.latest` / `src/latest.ts`)
+- Endpoint: `GET /Users/{userId}/Items/Latest`
+- `getLatest(options?)`: Retrieves newly added items per library view or across all media.
+- `getLatestMovies(options?)`: Convenience helper for recent movies (`includeItemTypes: ['Movie']`).
+- `getLatestEpisodes(options?)`: Convenience helper for recent TV episodes (`includeItemTypes: ['Episode']`).
+- `getLatestAlbums(options?)`: Convenience helper for recent music albums (`includeItemTypes: ['MusicAlbum']`).
+- Options: `parentId`, `limit`, `fields`, `includeItemTypes`, `isPlayed`, `enableImages`, `imageTypeLimit`, `enableImageTypes`, `groupItems`.
+
+### 13. Active Transcode Session Teardown (`client.transcode` / `src/transcode.ts`)
+- Endpoint: `DELETE /Videos/ActiveEncodings`
+- `stopActiveEncoding(playSessionId, deviceId?)` / `stop(...)`: Explicitly stops server-side FFmpeg transcoding process for the specified playback session.
+- Query parameters: `DeviceId`, `PlaySessionId`.
+
+### 14. Quality Presets & Bitrates (`src/quality.ts`)
+- Video Quality Presets: `4k`, `1080p-high`, `1080p`, `720p-high`, `720p`, `480p`, `360p`, `240p`, `direct`, `auto`.
+- Audio Quality Presets: `320k`, `256k`, `192k`, `128k`, `64k`, `direct`.
+- Utilities: `getVideoQualityList()`, `getAudioQualityList()`, `resolveVideoQuality()`, `resolveAudioQuality()`, `formatBitrate(bitrate)`.
+
+### 15. Search & Library Filtering (`client.search` / `src/search.ts`)
+- Endpoint: `GET /Users/{userId}/Items` with `SearchTerm`
+- `search(query, options?)`: Universal search across items with rich filtering.
+- `searchInLibrary(parentId, query, options?)`: Search scoped to a specific library view/folder.
+- `searchSongs(query, options?)`: Search audio tracks/songs (`includeItemTypes: 'Audio'`).
+- `searchAlbums(query, options?)`: Search music albums (`includeItemTypes: 'MusicAlbum'`).
+- `searchArtists(query, options?)`: Search music artists (`includeItemTypes: 'MusicArtist'`).
+- `searchMovies(query, options?)`: Search movies (`includeItemTypes: 'Movie'`).
+- `searchSeries(query, options?)`: Search TV series (`includeItemTypes: 'Series'`).
+- `searchEpisodes(query, options?)`: Search TV episodes (`includeItemTypes: 'Episode'`).
+- `SearchOptions`:
+  - `parentId`: Filter items by parent library view or folder ID.
+  - `includeItemTypes`: Item type filter as string or string array (e.g. `'Audio'`, `['Movie', 'Series']`).
+  - `mediaTypes`: Media type filter as string or string array (e.g. `'Audio'`, `'Video'`).
+  - `genres`: Array of genre names (joined with `|`).
+  - `years`: Array of production years (joined with `,`).
+  - `isFavorite`: Boolean filter for user favorites (`Filters=IsFavorite`).
+  - `sortBy`: Field name to sort by (e.g. `'SortName'`).
+  - `sortOrder`: `'Ascending' | 'Descending'`.
+  - `limit`: Maximum items to return (default 30).
+  - `startIndex`: Pagination offset (default 0).
+  - `fields`: Custom metadata fields string (defaults to `COMMON_SEARCH_FIELDS`).
+  - `recursive`: Boolean (defaults to `true`).
+  - `userId`: Explicit user ID override.
+
+## Events
+- `client.on(event, listener)` / `client.off(event, listener)`:
+  - `'authenticated'`: Dispatched upon successful login.
+  - `'unauthorized'`: Dispatched when any request returns 401.
+  - `'logout'`: Dispatched when `client.logout()` is called.
+

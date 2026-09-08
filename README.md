@@ -5,6 +5,9 @@ A modern, lightweight, modular, and type-safe Jellyfin SDK for Node.js and the B
 [![npm version](https://img.shields.io/npm/v/@francofantomius/jellyfin.svg)](https://www.npmjs.com/package/@francofantomius/jellyfin)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+**Current Version: `v0.2.0`** (THE PROJECT IS BEING ACTIVELY DEVELOPED. WAIT FOR VERSION 0.5.0 TO USE IT)
+
+
 ---
 
 ## Features
@@ -15,12 +18,17 @@ A modern, lightweight, modular, and type-safe Jellyfin SDK for Node.js and the B
 - **Clean modular architecture**:
   - `client.auth` - Server authentication, user profiles, capabilities reporting.
   - `client.library` - Browse music and video libraries (movies, series, seasons, episodes, videos, search, playback info).
+  - `client.search` - Dedicated universal search with granular item type, genre, year, and library view scoping.
   - `client.media` - Universal audio and video stream URLs, HLS playlists, subtitles, direct downloads, and responsive artwork.
   - `client.playlists` - Create, edit, delete playlists, manage tracks, and upload cover images.
   - `client.playback` - Report playback start, progress, and stop to Jellyfin for scrobbling and playback sync.
   - `client.lyrics` - Fetch synced or unsynced song lyrics.
   - `client.favorites` - Toggle favorite items.
   - `client.offline` - Browser IndexedDB media download manager for offline audio and video playback.
+  - `client.resume` - Continue watching / resume items querying (`/UserItems/Resume`).
+  - `client.nextUp` - Next unplayed TV show episodes (`/Shows/NextUp`).
+  - `client.latest` - Recently added media (movies, episodes, albums) (`/Users/{userId}/Items/Latest`).
+  - `client.transcode` - Teardown active transcoding sessions (`/Videos/ActiveEncodings`).
 - **Quality Settings & Presets**: Standard video (4K, 1080p, 720p, 480p, 360p, direct) and audio (320k, 256k, 192k, 128k, direct) presets and resolution utilities.
 - **Subtitles**: Direct VTT/SRT subtitle streaming URLs, raw text fetching, and automated track extraction from media metadata.
 - **Direct Downloads**: Server file download URLs, progress-tracked file downloads, and offline caching.
@@ -276,6 +284,67 @@ await client.favorites.unmarkFavorite(trackId);
 client.on('unauthorized', () => {
   console.warn('Jellyfin session has expired. Redirecting to login...');
 });
+```
+
+---
+
+### 11. Dashboard, Continue Watching & Next Up
+
+```typescript
+// Fetch in-progress items for Continue Watching carousels
+const resume = await client.resume.getResumeItems({
+  limit: 10,
+  mediaTypes: ['Video']
+});
+console.log('Continue watching:', resume.Items);
+
+// Fetch the next unplayed episodes for followed series
+const nextUp = await client.nextUp.getNextUp({
+  limit: 12,
+  enableTotalRecordCount: true
+});
+console.log('Next up episodes:', nextUp.Items);
+
+// Query recently added media across libraries or specific types
+const latestMovies = await client.latest.getLatestMovies({ limit: 10 });
+const latestEpisodes = await client.latest.getLatestEpisodes({ limit: 10 });
+const latestAlbums = await client.latest.getLatestAlbums({ limit: 10 });
+```
+
+---
+
+### 12. Active Transcode Session Teardown
+
+```typescript
+const playSessionId = 'playback-session-id';
+
+// Teardown active server transcoding to terminate lingering FFmpeg processes
+await client.transcode.stopActiveEncoding(playSessionId);
+
+// Or automatically teardown during playback stop reporting:
+await client.playback.reportStopped(movieId, currentTicks, { playSessionId });
+```
+
+---
+
+### 13. Universal & Scoped Search
+
+```typescript
+// Universal search across all items
+const results = await client.search.search('Inception', {
+  includeItemTypes: ['Movie', 'Series'],
+  genres: ['Sci-Fi'],
+  limit: 20
+});
+
+// Search within a specific library folder
+const musicResults = await client.search.searchInLibrary('music-library-id', 'Queen');
+
+// Media-specific search shortcuts
+const songs = await client.search.searchSongs('Yellow');
+const albums = await client.search.searchAlbums('Parachutes');
+const movies = await client.search.searchMovies('Interstellar');
+const series = await client.search.searchSeries('Breaking Bad');
 ```
 
 ---

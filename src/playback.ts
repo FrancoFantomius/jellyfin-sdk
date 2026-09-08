@@ -49,8 +49,13 @@ export class PlaybackModule {
 
   /**
    * Report that playback has stopped for an item.
+   * Optionally teardown active transcoding session if playSessionId is provided.
    */
-  async reportStopped(itemId: string, positionTicks: number = 0): Promise<void> {
+  async reportStopped(
+    itemId: string,
+    positionTicks: number = 0,
+    options?: { playSessionId?: string }
+  ): Promise<void> {
     if (!itemId || !this.http.getToken()) return;
     try {
       await this.http.request('/Sessions/Playing/Stopped', {
@@ -60,6 +65,21 @@ export class PlaybackModule {
           PositionTicks: positionTicks
         }
       });
+
+      if (options?.playSessionId) {
+        const deviceId = this.http.getClientInfo()?.deviceId;
+        if (deviceId) {
+          await this.http.request('/Videos/ActiveEncodings', {
+            method: 'DELETE',
+            params: {
+              DeviceId: deviceId,
+              PlaySessionId: options.playSessionId
+            }
+          }).catch((err) => {
+            console.warn('[Jellyfin SDK] Teardown active encoding error:', err);
+          });
+        }
+      }
     } catch (e) {
       console.warn('[Jellyfin SDK] Stop playback report error:', e);
     }

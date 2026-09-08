@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-09-08
+
+### Added
+- **Resume & Continue Watching**:
+  - `ResumeModule` (`src/resume.ts`) querying `GET /UserItems/Resume` via `client.resume.getResumeItems()` and `client.resume.getItems()`.
+  - Support for media type filtering, pagination (`limit`, `startIndex`), parent library folders, and user data fields.
+- **Next Up for TV Shows**:
+  - `NextUpModule` (`src/next-up.ts`) querying `GET /Shows/NextUp` via `client.nextUp.getNextUp()` and `client.nextUp.getEpisodes()`.
+  - Support for series-specific filtering (`seriesId`), library views, and total count metadata.
+- **Latest / Recently Added Media**:
+  - `LatestModule` (`src/latest.ts`) querying `GET /Users/{userId}/Items/Latest` via `client.latest.getLatest()`.
+  - Specialized convenience helpers: `client.latest.getLatestMovies()`, `client.latest.getLatestEpisodes()`, and `client.latest.getLatestAlbums()`.
+- **Active Transcode Session Teardown**:
+  - `TranscodeModule` (`src/transcode.ts`) terminating active server transcoding sessions via `DELETE /Videos/ActiveEncodings`.
+  - Methods: `client.transcode.stopActiveEncoding(playSessionId, deviceId)` and `client.transcode.stop(...)`.
+  - Integrated into `client.playback.reportStopped(itemId, positionTicks, { playSessionId })` to terminate lingering server FFmpeg instances on playback stop.
+- **Universal & Scoped Search**:
+  - `SearchModule` (`src/search.ts`) providing modular search via `client.search.search()`.
+  - Scoped library searching: `client.search.searchInLibrary(parentId, query, options)`.
+  - Dedicated convenience methods: `searchSongs()`, `searchAlbums()`, `searchArtists()`, `searchMovies()`, `searchSeries()`, and `searchEpisodes()`.
+  - Enhanced `client.library.search()` to support all advanced filtering options (`parentId`, `includeItemTypes`, `mediaTypes`, `genres`, `years`, `isFavorite`, `sortBy`, `sortOrder`, `fields`, `recursive`, `userId`).
+- **Security Policy**:
+  - Added `SECURITY.md` establishing version support (0.2.x supported) and vulnerability disclosure workflow.
+- **Documentation & AI Context**:
+  - Added comprehensive `llms.txt` documenting SDK architecture, client modules, options, and event lifecycles.
+  - Updated `ROADMAP.md` marking Milestone 1 as completed.
+
 ## [0.1.0] - 2026-09-08
 
 ### Added

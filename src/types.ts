@@ -237,7 +237,17 @@ export interface GetSongsOptions {
 export interface SearchOptions {
   limit?: number;
   startIndex?: number;
-  includeItemTypes?: string;
+  parentId?: string;
+  includeItemTypes?: string | string[];
+  mediaTypes?: string | string[];
+  genres?: string[];
+  years?: number[];
+  isFavorite?: boolean;
+  sortBy?: string;
+  sortOrder?: 'Ascending' | 'Descending';
+  fields?: string;
+  recursive?: boolean;
+  userId?: string;
 }
 
 export interface CreatePlaylistDto {
@@ -494,11 +504,61 @@ export interface DownloadItemOptions {
   quality?: VideoQualityPresetKey | VideoQualityOption | number | string;
 }
 
+// --- Milestone 1: Dashboard, Resume & Transcode Options ---
+
+export interface GetResumeItemsOptions {
+  userId?: string;
+  limit?: number;
+  startIndex?: number;
+  parentId?: string;
+  mediaTypes?: string[];
+  enableImages?: boolean;
+  enableUserData?: boolean;
+  imageTypeLimit?: number;
+  enableImageTypes?: string[];
+  fields?: string;
+}
+
+export interface GetNextUpOptions {
+  userId?: string;
+  parentId?: string;
+  seriesId?: string;
+  limit?: number;
+  startIndex?: number;
+  fields?: string;
+  enableImages?: boolean;
+  enableUserData?: boolean;
+  enableTotalRecordCount?: boolean;
+  imageTypeLimit?: number;
+  enableImageTypes?: string[];
+  disableFirstEpisode?: boolean;
+  nextUpDateCutoff?: string;
+}
+
+export interface GetLatestMediaOptions {
+  userId?: string;
+  parentId?: string;
+  limit?: number;
+  fields?: string;
+  includeItemTypes?: string[];
+  isPlayed?: boolean;
+  enableImages?: boolean;
+  imageTypeLimit?: number;
+  enableImageTypes?: string[];
+  groupItems?: boolean;
+}
+
+export interface StopActiveEncodingOptions {
+  playSessionId: string;
+  deviceId?: string;
+}
+
 export type {
   VideoQualityPresetKey,
   VideoQualityOption,
   AudioQualityPresetKey,
   AudioQualityOption
 };
+
 
 

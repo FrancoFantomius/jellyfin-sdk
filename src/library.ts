@@ -362,22 +362,50 @@ export class LibraryModule {
       return { Items: [], TotalRecordCount: 0 };
     }
 
-    const userId = this.requireUserId();
+    const userId = options.userId || this.requireUserId();
     const {
       limit = 30,
       startIndex = 0,
-      includeItemTypes = 'Audio,MusicAlbum,MusicArtist,Playlist,Movie,Series,Episode'
+      parentId,
+      includeItemTypes = 'Audio,MusicAlbum,MusicArtist,Playlist,Movie,Series,Episode',
+      mediaTypes,
+      genres,
+      years,
+      isFavorite,
+      sortBy,
+      sortOrder,
+      fields = COMMON_ITEM_FIELDS,
+      recursive = true
     } = options;
 
-    return await this.http.request<ItemsResponse>(`/Users/${userId}/Items`, {
-      params: {
-        SearchTerm: query.trim(),
-        IncludeItemTypes: includeItemTypes,
-        Limit: limit,
-        StartIndex: startIndex,
-        Recursive: true,
-        Fields: COMMON_ITEM_FIELDS
-      }
-    });
+    const params: Record<string, unknown> = {
+      SearchTerm: query.trim(),
+      Limit: limit,
+      StartIndex: startIndex,
+      Recursive: recursive,
+      Fields: fields
+    };
+
+    if (parentId) params.ParentId = parentId;
+
+    if (includeItemTypes) {
+      params.IncludeItemTypes = Array.isArray(includeItemTypes)
+        ? includeItemTypes.join(',')
+        : includeItemTypes;
+    }
+
+    if (mediaTypes) {
+      params.MediaTypes = Array.isArray(mediaTypes)
+        ? mediaTypes.join(',')
+        : mediaTypes;
+    }
+
+    if (genres && genres.length > 0) params.Genres = genres.join('|');
+    if (years && years.length > 0) params.Years = years.join(',');
+    if (isFavorite) params.Filters = 'IsFavorite';
+    if (sortBy) params.SortBy = sortBy;
+    if (sortOrder) params.SortOrder = sortOrder;
+
+    return await this.http.request<ItemsResponse>(`/Users/${userId}/Items`, { params });
   }
 }

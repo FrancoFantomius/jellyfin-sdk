@@ -70,5 +70,29 @@ describe('JellyfinClient', () => {
     expect(onUnauthorizedCallback).toHaveBeenCalled();
     expect(eventListener).toHaveBeenCalled();
   });
+
+  it('should initialize all modules including v0.2.0 modules', () => {
+    const client = new JellyfinClient({
+      serverUrl: 'https://jellyfin.example.com',
+      accessToken: 'token-123',
+      userId: 'user-123'
+    });
+
+    expect(client.auth).toBeDefined();
+    expect(client.system).toBeDefined();
+    expect(client.library).toBeDefined();
+    expect(client.search).toBeDefined();
+    expect(client.playlists).toBeDefined();
+    expect(client.playback).toBeDefined();
+    expect(client.media).toBeDefined();
+    expect(client.lyrics).toBeDefined();
+    expect(client.favorites).toBeDefined();
+    expect(client.offline).toBeDefined();
+    expect(client.resume).toBeDefined();
+    expect(client.nextUp).toBeDefined();
+    expect(client.latest).toBeDefined();
+    expect(client.transcode).toBeDefined();
+    expect(client.info.version).toBe('0.2.0');
+  });
 });
 
