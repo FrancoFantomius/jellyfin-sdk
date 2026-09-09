@@ -553,12 +553,186 @@ export interface StopActiveEncodingOptions {
   deviceId?: string;
 }
 
+// --- Milestone 2: Real-time Communication & Remote Control ---
+
+export type WebSocketMessageType =
+  | 'KeepAlive'
+  | 'ForceKeepAlive'
+  | 'LibraryChanged'
+  | 'UserDataChanged'
+  | 'Sessions'
+  | 'Play'
+  | 'Playstate'
+  | 'GeneralCommand'
+  | 'ActivityLogEntry'
+  | 'ScheduledTasksInfo'
+  | 'ScheduledTasksInfoStop'
+  | 'SessionsStart'
+  | 'SessionsStop'
+  | (string & {});
+
+export interface WebSocketInboundMessage<T = unknown> {
+  MessageType: WebSocketMessageType;
+  MessageId?: string;
+  Data?: T;
+}
+
+export interface LibraryChangedData {
+  FoldersAddedTo?: string[];
+  FoldersRemovedFrom?: string[];
+  ItemsAdded?: string[];
+  ItemsUpdated?: string[];
+  ItemsRemoved?: string[];
+  CollectionFolders?: string[];
+  EmptyFolders?: string[];
+}
+
+export interface UserDataChangedData {
+  UserId: string;
+  UserDataList: UserItemDataDto[];
+}
+
+export interface WebSocketModuleOptions {
+  autoReconnect?: boolean;
+  reconnectIntervalMs?: number;
+  maxReconnectAttempts?: number;
+  keepAliveIntervalMs?: number;
+  webSocketFactory?: (url: string) => any;
+}
+
+export interface SessionPlayState {
+  PositionTicks?: number;
+  CanSeek?: boolean;
+  IsPaused?: boolean;
+  IsMuted?: boolean;
+  VolumeLevel?: number;
+  AudioStreamIndex?: number;
+  SubtitleStreamIndex?: number;
+  MediaSourceId?: string;
+  PlayMethod?: string;
+  RepeatMode?: string;
+  PlaylistItemId?: string;
+}
+
+export interface SessionInfoDto {
+  Id: string;
+  UserId?: string;
+  UserName?: string;
+  Client?: string;
+  LastActivityDate?: string;
+  LastPlaybackCheckIn?: string;
+  DeviceName?: string;
+  DeviceType?: string;
+  NowPlayingItem?: BaseItemDto;
+  NowViewingItem?: BaseItemDto;
+  DeviceId?: string;
+  ApplicationVersion?: string;
+  IsActive?: boolean;
+  SupportsMediaControl?: boolean;
+  SupportsRemoteControl?: boolean;
+  PlayableMediaTypes?: string[];
+  SupportedCommands?: string[];
+  TranscodingInfo?: Record<string, unknown>;
+  PlayState?: SessionPlayState;
+  AdditionalUsers?: Array<{ UserId: string; UserName: string }>;
+  Capabilities?: Record<string, unknown>;
+}
+
+export interface GetSessionsOptions {
+  controllableByUserId?: string;
+  deviceId?: string;
+  activeWithinSeconds?: number;
+}
+
+export type PlayCommandType = 'PlayNow' | 'PlayNext' | 'PlayLast';
+
+export interface RemotePlayOptions {
+  playCommand?: PlayCommandType;
+  startPositionTicks?: number;
+  mediaSourceId?: string;
+  audioStreamIndex?: number;
+  subtitleStreamIndex?: number;
+  startIndex?: number;
+}
+
+export type PlaystateCommand =
+  | 'PlayPause'
+  | 'Pause'
+  | 'Unpause'
+  | 'Stop'
+  | 'Seek'
+  | 'NextTrack'
+  | 'PreviousTrack';
+
+export type GeneralCommandType =
+  | 'MoveUp'
+  | 'MoveDown'
+  | 'MoveLeft'
+  | 'MoveRight'
+  | 'PageUp'
+  | 'PageDown'
+  | 'PreviousLetter'
+  | 'NextLetter'
+  | 'ToggleOsd'
+  | 'ToggleContextMenu'
+  | 'Select'
+  | 'Back'
+  | 'TakeScreenshot'
+  | 'SendKey'
+  | 'SendString'
+  | 'GoHome'
+  | 'GoToSettings'
+  | 'VolumeUp'
+  | 'VolumeDown'
+  | 'Mute'
+  | 'Unmute'
+  | 'ToggleMute'
+  | 'SetVolume'
+  | 'SetAudioStreamIndex'
+  | 'SetSubtitleStreamIndex'
+  | 'DisplayContent'
+  | 'DisplayMessage'
+  | (string & {});
+
+export interface GeneralCommandDto {
+  Name: GeneralCommandType;
+  Arguments?: Record<string, string>;
+}
+
+export interface SessionMessageOptions {
+  header?: string;
+  text: string;
+  timeoutMs?: number;
+}
+
+export interface QuickConnectResult {
+  Code: string;
+  Secret: string;
+  AuthenticationToken?: string;
+}
+
+export interface QuickConnectState {
+  Authenticated: boolean;
+  Secret: string;
+  Code?: string;
+  AuthenticationToken?: string;
+  UserId?: string;
+  DateAdded?: string;
+}
+
+export interface QuickConnectPollOptions {
+  intervalMs?: number;
+  timeoutMs?: number;
+  signal?: AbortSignal;
+}
+
 export type {
   VideoQualityPresetKey,
   VideoQualityOption,
   AudioQualityPresetKey,
   AudioQualityOption
 };
+
 
 
 

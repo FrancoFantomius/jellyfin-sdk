@@ -19,6 +19,10 @@ export { NextUpModule } from './next-up.js';
 export { LatestModule } from './latest.js';
 export { TranscodeModule } from './transcode.js';
 export { SearchModule, COMMON_SEARCH_FIELDS } from './search.js';
+export { WebSocketModule } from './websocket.js';
+export type { WebSocketEventListener } from './websocket.js';
+export { SessionsModule } from './sessions.js';
+export { QuickConnectModule } from './quick-connect.js';
 
 export {
   VIDEO_QUALITY_PRESETS,
@@ -98,5 +102,22 @@ export type {
   GetResumeItemsOptions,
   GetNextUpOptions,
   GetLatestMediaOptions,
-  StopActiveEncodingOptions
+  StopActiveEncodingOptions,
+  WebSocketMessageType,
+  WebSocketInboundMessage,
+  LibraryChangedData,
+  UserDataChangedData,
+  WebSocketModuleOptions,
+  SessionPlayState,
+  SessionInfoDto,
+  GetSessionsOptions,
+  PlayCommandType,
+  RemotePlayOptions,
+  PlaystateCommand,
+  GeneralCommandType,
+  GeneralCommandDto,
+  SessionMessageOptions,
+  QuickConnectResult,
+  QuickConnectState,
+  QuickConnectPollOptions
 } from './types.js';

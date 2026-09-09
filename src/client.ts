@@ -13,6 +13,9 @@ import { NextUpModule } from './next-up.js';
 import { LatestModule } from './latest.js';
 import { TranscodeModule } from './transcode.js';
 import { SearchModule } from './search.js';
+import { WebSocketModule } from './websocket.js';
+import { SessionsModule } from './sessions.js';
+import { QuickConnectModule } from './quick-connect.js';
 import { CacheAdapter, MemoryCacheAdapter } from './cache.js';
 import { generateDeviceId, getDefaultStorage } from './storage.js';
 import type { ClientInfo, JellyfinClientOptions, StorageAdapter } from './types.js';
@@ -35,6 +38,9 @@ export class JellyfinClient {
   public readonly nextUp: NextUpModule;
   public readonly latest: LatestModule;
   public readonly transcode: TranscodeModule;
+  public readonly websocket: WebSocketModule;
+  public readonly sessions: SessionsModule;
+  public readonly quickConnect: QuickConnectModule;
 
   private http: HttpTransport;
   private storage: StorageAdapter;
@@ -48,7 +54,7 @@ export class JellyfinClient {
 
     this.clientInfo = {
       name: options.clientInfo?.name || '@francofantomius/jellyfin',
-      version: options.clientInfo?.version || '0.2.0',
+      version: options.clientInfo?.version || '0.3.0',
       device: options.clientInfo?.device || (typeof window !== 'undefined' ? 'Web Browser' : 'Node.js'),
       deviceId: options.clientInfo?.deviceId || generateDeviceId()
     };
@@ -86,6 +92,9 @@ export class JellyfinClient {
     this.nextUp = new NextUpModule(this.http, getUserId);
     this.latest = new LatestModule(this.http, getUserId);
     this.transcode = new TranscodeModule(this.http, getDeviceId);
+    this.websocket = new WebSocketModule(this.http, getDeviceId);
+    this.sessions = new SessionsModule(this.http, getUserId);
+    this.quickConnect = new QuickConnectModule(this.http);
   }
 
   // --- Configuration Getters & Setters ---
@@ -211,6 +220,9 @@ export class JellyfinClient {
    * Log out and clear tokens and session.
    */
   logout(): void {
+    if (this.websocket.isConnected) {
+      this.websocket.disconnect();
+    }
     this.auth.logout();
     this.emit('logout');
   }

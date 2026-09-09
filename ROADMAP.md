@@ -4,7 +4,7 @@ This roadmap documents the current implementation status and planned features fo
 
 ---
 
-## 🟢 Currently Implemented Features (v0.2.0)
+## 🟢 Currently Implemented Features (v0.3.0)
 
 ### 1. Client Core & Infrastructure
 - **Unified SDK Client (`JellyfinClient`)**: Main client coordinating all modules with configurable options.
@@ -55,6 +55,11 @@ This roadmap documents the current implementation status and planned features fo
 - **IndexedDB Media Caching**: Complete browser IndexedDB offline store for media blobs, artwork, and metadata.
 - **Item & Batch Downloads**: `downloadItem`, `downloadItems`, cancellation/removal (`removeDownload`), and cache warming (`warmOfflineCache`).
 
+### 9. Real-time Communication & Remote Control (v0.3.0)
+- **WebSocket Event Stream (`src/websocket.ts`)**: Isomorphic WebSocket client connecting to `/socket`, automatic keep-alive pinging, auto-reconnect backoff, and event dispatching (`libraryChanged`, `userDataChanged`, `sessions`, connection lifecycle).
+- **Remote Control & Sessions (`src/sessions.ts`)**: Server session discovery, remote play command dispatching, playstate controls (`playPause`, `pause`, `unpause`, `stop`, `seek`, `nextTrack`, `previousTrack`), volume control, on-screen dialog messages, and navigation.
+- **Quick Connect Flow (`src/quick-connect.ts`)**: Quick Connect client initiation, polling with abort support, and cross-device authorization for TV and console apps.
+
 ---
 
 ## 🚀 Planned Milestones & Next Steps
@@ -71,15 +76,15 @@ Each feature will follow the SDK rule of being placed in its own dedicated sourc
 - [x] **Active Transcode Session Teardown** (`src/transcode.ts`):
   - Explicit session teardown via `/Videos/ActiveEncodings` on playback stop to avoid lingering server FFmpeg instances.
 
-### Milestone 2: Real-time Communication & Remote Control (v0.3.0)
-- [ ] **WebSocket Real-time Event Stream** (`src/websocket.ts`):
+### Milestone 2: Real-time Communication & Remote Control (v0.3.0) [Completed]
+- [x] **WebSocket Real-time Event Stream** (`src/websocket.ts`):
   - Persistent WebSocket connection to `/socket?api_key=...&deviceId=...`.
   - Automatic keep-alive pings (`KeepAlive`).
   - Server event dispatching (`LibraryChanged`, `UserDataChanged`, `Sessions`).
-- [ ] **Remote Control & Session Management** (`src/sessions.ts`):
+- [x] **Remote Control & Session Management** (`src/sessions.ts`):
   - Query active sessions across the server (`GET /Sessions`).
   - Send playback and volume commands to other sessions (`Play`, `Pause`, `Seek`, `SetVolume`, `Message`).
-- [ ] **Quick Connect Flow** (`src/quick-connect.ts`):
+- [x] **Quick Connect Flow** (`src/quick-connect.ts`):
   - Client authentication flow for TV / secondary devices (`/QuickConnect/Initiate`, `/QuickConnect/Connect`, `/QuickConnect/Authorize`).
 
 ### Milestone 3: Rich Media Navigation & Metadata (v0.4.0)

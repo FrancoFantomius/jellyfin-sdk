@@ -5,7 +5,7 @@ A modern, lightweight, modular, and type-safe Jellyfin SDK for Node.js and the B
 [![npm version](https://img.shields.io/npm/v/@francofantomius/jellyfin.svg)](https://www.npmjs.com/package/@francofantomius/jellyfin)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-**Current Version: `v0.2.0`** (THE PROJECT IS BEING ACTIVELY DEVELOPED. WAIT FOR VERSION 0.5.0 TO USE IT)
+**Current Version: `v0.3.0`** (THE PROJECT IS BEING ACTIVELY DEVELOPED. WAIT FOR VERSION 0.5.0 TO USE IT)
 
 
 ---
@@ -29,6 +29,9 @@ A modern, lightweight, modular, and type-safe Jellyfin SDK for Node.js and the B
   - `client.nextUp` - Next unplayed TV show episodes (`/Shows/NextUp`).
   - `client.latest` - Recently added media (movies, episodes, albums) (`/Users/{userId}/Items/Latest`).
   - `client.transcode` - Teardown active transcoding sessions (`/Videos/ActiveEncodings`).
+  - `client.websocket` - Real-time WebSocket event streaming, keep-alive heartbeat, and automated reconnection.
+  - `client.sessions` - Remote control active sessions, playback commands, volume adjustment, and message modals.
+  - `client.quickConnect` - Quick Connect pairing flow for TVs and secondary devices.
 - **Quality Settings & Presets**: Standard video (4K, 1080p, 720p, 480p, 360p, direct) and audio (320k, 256k, 192k, 128k, direct) presets and resolution utilities.
 - **Subtitles**: Direct VTT/SRT subtitle streaming URLs, raw text fetching, and automated track extraction from media metadata.
 - **Direct Downloads**: Server file download URLs, progress-tracked file downloads, and offline caching.
@@ -349,6 +352,100 @@ const series = await client.search.searchSeries('Breaking Bad');
 
 ---
 
+### 14. Real-time WebSocket Event Streaming
+
+```typescript
+// Connect to real-time WebSocket event feed
+client.websocket.connect({
+  autoReconnect: true,
+  keepAliveIntervalMs: 30000
+});
+
+// Listen to connection state
+client.websocket.on('open', () => console.log('WebSocket connected'));
+client.websocket.on('close', (code, reason) => console.log('WebSocket closed', code, reason));
+
+// Listen for library updates (scanned/added items)
+client.websocket.on('libraryChanged', (data) => {
+  console.log('Library changed. Items added:', data.ItemsAdded);
+});
+
+// Listen for user data updates (played state, favorites)
+client.websocket.on('userDataChanged', (data) => {
+  console.log('User data changed for user:', data.UserId);
+});
+
+// Subscribe to live session updates across the server
+client.websocket.startSessionsSubscription(2000);
+client.websocket.on('sessions', (sessions) => {
+  console.log('Active server sessions:', sessions);
+});
+```
+
+---
+
+### 15. Remote Control & Sessions Management
+
+```typescript
+// Query all active sessions
+const sessions = await client.sessions.getSessions();
+const targetSession = sessions.find((s) => s.DeviceName === 'Living Room TV');
+
+if (targetSession) {
+  // Remote playback control
+  await client.sessions.play(targetSession.Id, ['movie-id-1'], {
+    playCommand: 'PlayNow',
+    startPositionTicks: 0
+  });
+
+  // Playback commands
+  await client.sessions.pause(targetSession.Id);
+  await client.sessions.playPause(targetSession.Id);
+  await client.sessions.seek(targetSession.Id, 120_000_000); // 12 seconds in ticks
+
+  // Volume control
+  await client.sessions.setVolume(targetSession.Id, 75);
+  await client.sessions.toggleMute(targetSession.Id);
+
+  // Send an on-screen dialog message
+  await client.sessions.sendMessage(targetSession.Id, {
+    header: 'Notification',
+    text: 'Dinner is ready in 5 minutes!',
+    timeoutMs: 8000
+  });
+
+  // Instruct session to navigate to an item
+  await client.sessions.viewItem(targetSession.Id, 'Movie', 'movie-id-1', 'Inception');
+}
+```
+
+---
+
+### 16. Quick Connect Device Pairing Flow
+
+```typescript
+// On a secondary device (e.g. Smart TV or CLI app):
+if (await client.quickConnect.isEnabled()) {
+  const { Code, Secret } = await client.quickConnect.initiate();
+  console.log(`Enter this code on your phone/PC: ${Code}`);
+
+  // Automatically poll until authorized
+  const state = await client.quickConnect.poll(Secret, { intervalMs: 2000, timeoutMs: 120000 });
+  if (state.Authenticated && state.AuthenticationToken) {
+    client.accessToken = state.AuthenticationToken;
+    if (state.UserId) client.userId = state.UserId;
+    console.log('Successfully authenticated via Quick Connect!');
+  }
+}
+
+// On an already authenticated device (e.g. phone or PC):
+await client.quickConnect.authorize('123 456');
+console.log('Device authorized!');
+```
+
+---
+
 ## License
 
 MIT © [Franco Fantomius](https://github.com/francofantomius)
+

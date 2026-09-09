@@ -4,7 +4,7 @@
 
 ## Overview
 - Package: `@francofantomius/jellyfin`
-- Version: `0.2.0`
+- Version: `0.3.0`
 - Target Environment: Universal / Isomorphic (Node.js 18+, Bun, Deno, modern Browsers)
 - Formats: Dual ESM (`dist/index.js`) and CJS (`dist/index.cjs`), with TypeScript type declarations (`dist/index.d.ts`).
 - License: MIT
@@ -162,9 +162,55 @@
   - `recursive`: Boolean (defaults to `true`).
   - `userId`: Explicit user ID override.
 
+### 16. Real-time WebSocket Event Streaming (`client.websocket` / `src/websocket.ts`)
+- Endpoint: `ws[s]://{serverUrl}/socket?api_key={token}&deviceId={deviceId}`
+- `connect(options?)`: Connects to WebSocket with automatic reconnect and keep-alive.
+- `disconnect()`: Cleanly closes socket and stops all timers.
+- `isConnected`: Boolean getter checking if readyState is OPEN.
+- `getWebSocketUrl()`: Returns computed WebSocket URL.
+- `send(message)`: Sends string or JSON payload.
+- `sendKeepAlive()`: Sends `{"MessageType": "KeepAlive"}` heartbeat.
+- Subscriptions:
+  - `startSessionsSubscription(intervalMs?)` / `stopSessionsSubscription()`
+  - `startScheduledTasksSubscription(intervalMs?)` / `stopScheduledTasksSubscription()`
+  - `startActivityLogSubscription(intervalMs?)` / `stopActivityLogSubscription()`
+- Event Listeners:
+  - `on('open', fn)` / `on('close', fn)` / `on('error', fn)` / `on('message', fn)`
+  - `on('libraryChanged', fn)` (receives `LibraryChangedData`)
+  - `on('userDataChanged', fn)` (receives `UserDataChangedData`)
+  - `on('sessions', fn)` (receives `SessionInfoDto[]`)
+
+### 17. Remote Control & Sessions (`client.sessions` / `src/sessions.ts`)
+- `getSessions(options?)`: Queries `/Sessions` across the server. Options: `controllableByUserId`, `deviceId`, `activeWithinSeconds`.
+- `play(sessionId, itemIds, options?)`: POST `/Sessions/{sessionId}/Playing` with `PlayCommand` (`PlayNow`, `PlayNext`, `PlayLast`), `startPositionTicks`, `mediaSourceId`, `audioStreamIndex`, `subtitleStreamIndex`.
+- Playstate Commands (POST `/Sessions/{sessionId}/Playing/{command}`):
+  - `playPause(sessionId)`
+  - `pause(sessionId)`
+  - `unpause(sessionId)`
+  - `stop(sessionId)`
+  - `seek(sessionId, positionTicks)`
+  - `nextTrack(sessionId)`
+  - `previousTrack(sessionId)`
+- General & Volume Commands (POST `/Sessions/{sessionId}/Command`):
+  - `setVolume(sessionId, volume)` (0-100)
+  - `mute(sessionId)` / `unmute(sessionId)` / `toggleMute(sessionId)`
+  - `setAudioStreamIndex(sessionId, index)` / `setSubtitleStreamIndex(sessionId, index)`
+  - `sendGeneralCommand(sessionId, command)`
+- Remote Dialog & Navigation:
+  - `sendMessage(sessionId, options)`: POST `/Sessions/{sessionId}/Message` (displays pop-up modal).
+  - `viewItem(sessionId, itemType, itemId, itemName)`: POST `/Sessions/{sessionId}/Viewing`.
+
+### 18. Quick Connect Device Pairing (`client.quickConnect` / `src/quick-connect.ts`)
+- `isEnabled()`: GET `/QuickConnect/Enabled` checking if Quick Connect is active on server.
+- `initiate()`: POST `/QuickConnect/Initiate` generating short device code and secret.
+- `check(secret)`: GET `/QuickConnect/Connect?secret={secret}` returning `QuickConnectState` with authorization status.
+- `authorize(code, userId?)`: POST `/QuickConnect/Authorize` called from an authenticated session to approve the secondary device.
+- `poll(secret, options?)`: Continuously polls status until authenticated or timeout (supports `intervalMs`, `timeoutMs`, `signal`).
+
 ## Events
 - `client.on(event, listener)` / `client.off(event, listener)`:
   - `'authenticated'`: Dispatched upon successful login.
   - `'unauthorized'`: Dispatched when any request returns 401.
   - `'logout'`: Dispatched when `client.logout()` is called.
+
 

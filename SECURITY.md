@@ -6,6 +6,7 @@ The following table outlines which versions of `@francofantomius/jellyfin` curre
 
 | Version | Supported          |
 | ------- | ------------------ |
+| 0.3.x   | :white_check_mark: |
 | 0.2.x   | :white_check_mark: |
 | < 0.2   | :x:                |
 

@@ -5,7 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.2.0] - 2026-09-08
+## [0.3.0] - 2026-09-09
+
+### Added
+- **Real-time WebSocket Event Streaming**:
+  - `WebSocketModule` (`src/websocket.ts`) connecting to `/socket?api_key=...&deviceId=...` with isomorphic runtime support (`globalThis.WebSocket` or custom factory).
+  - Configurable periodic keep-alive heartbeat (`{"MessageType": "KeepAlive"}`) and automatic reconnection with backoff.
+  - Granular event emission: `libraryChanged`, `userDataChanged`, `sessions`, `open`, `close`, `error`, and raw message handling.
+  - Live subscription controllers: `startSessionsSubscription`, `stopSessionsSubscription`, `startScheduledTasksSubscription`, `stopScheduledTasksSubscription`, `startActivityLogSubscription`, and `stopActivityLogSubscription`.
+- **Remote Control & Session Management**:
+  - `SessionsModule` (`src/sessions.ts`) providing full remote control over active client sessions.
+  - Active session querying via `client.sessions.getSessions(options)`.
+  - Remote playback control via `client.sessions.play(sessionId, itemIds, options)`.
+  - Remote playstate controls: `playPause`, `pause`, `unpause`, `stop`, `seek`, `nextTrack`, and `previousTrack`.
+  - Volume and track adjustment: `setVolume`, `mute`, `unmute`, `toggleMute`, `setAudioStreamIndex`, and `setSubtitleStreamIndex`.
+  - On-screen modal message dialogs via `client.sessions.sendMessage(sessionId, options)`.
+  - Remote screen navigation via `client.sessions.viewItem(sessionId, itemType, itemId, itemName)`.
+- **Quick Connect Device Pairing Flow**:
+  - `QuickConnectModule` (`src/quick-connect.ts`) for TV, console, and secondary device authentication.
+  - Feature detection: `client.quickConnect.isEnabled()`.
+  - Session initiation: `client.quickConnect.initiate()` returning user code and secret.
+  - State checking & automated polling: `client.quickConnect.check(secret)` and `client.quickConnect.poll(secret, options)`.
+  - Cross-device authorization: `client.quickConnect.authorize(code, userId?)` to approve code from an authenticated device.
+- **Client Integration**:
+  - Attached sub-modules directly to `JellyfinClient`: `client.websocket`, `client.sessions`, and `client.quickConnect`.
+  - Automatic WebSocket disconnection upon `client.logout()`.
+  - Updated default client version to `0.3.0`.
+- **Package & Repository Metadata**:
+  - Added repository, issues bug tracker, and homepage metadata to `package.json` for npm provenance.
+  - Added Dependabot configuration for npm automated dependency updates (`.github/dependabot.yml`).
+  - Updated `SECURITY.md` supported versions table with `0.3.x`.
+
+## [0.2.0] - 2026-09-09
 
 ### Added
 - **Resume & Continue Watching**:
