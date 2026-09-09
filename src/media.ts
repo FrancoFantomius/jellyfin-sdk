@@ -98,6 +98,7 @@ export class MediaModule {
     const maxStreamingBitrate = options.maxStreamingBitrate ?? qualityResolved.maxStreamingBitrate;
 
     const {
+      static: isStatic = false,
       startTimeTicks = 0,
       container = 'opus,mp3|mp3,aac,m4a,m4b,flac,wav,ogg',
       transcodingContainer = 'mp3',
@@ -105,15 +106,28 @@ export class MediaModule {
       useQueryToken = true
     } = options;
 
-    const url = new URL(`${serverUrl}/Audio/${itemId}/universal`);
-    if (token && useQueryToken) url.searchParams.append('api_key', token);
-    if (userId) url.searchParams.append('UserId', userId);
-    if (clientInfo.deviceId) url.searchParams.append('DeviceId', clientInfo.deviceId);
+    const endpoint = isStatic ? `/Audio/${itemId}/stream` : `/Audio/${itemId}/universal`;
+    const url = new URL(`${serverUrl}${endpoint}`);
 
-    url.searchParams.append('Container', container);
-    url.searchParams.append('TranscodingContainer', transcodingContainer);
-    url.searchParams.append('TranscodingProtocol', 'http');
-    url.searchParams.append('AudioCodec', audioCodec);
+    if (token && useQueryToken) {
+      url.searchParams.append('api_key', token);
+      url.searchParams.append('X-Emby-Token', token);
+    }
+    if (userId) url.searchParams.append('UserId', userId);
+
+    const targetDeviceId = options.deviceId !== undefined ? options.deviceId : clientInfo.deviceId;
+    if (targetDeviceId) url.searchParams.append('DeviceId', targetDeviceId);
+
+    if (isStatic) {
+      url.searchParams.append('static', 'true');
+    } else {
+      url.searchParams.append('Container', container);
+      url.searchParams.append('TranscodingContainer', transcodingContainer);
+      url.searchParams.append('TranscodingProtocol', 'http');
+      url.searchParams.append('AudioCodec', audioCodec);
+      url.searchParams.append('EnableRedirection', 'true');
+      url.searchParams.append('EnableRemoteMedia', 'false');
+    }
 
     if (maxStreamingBitrate && maxStreamingBitrate !== 'Direct') {
       url.searchParams.append('MaxStreamingBitrate', String(maxStreamingBitrate));
@@ -121,9 +135,6 @@ export class MediaModule {
     if (startTimeTicks > 0) {
       url.searchParams.append('StartTimeTicks', String(startTimeTicks));
     }
-
-    url.searchParams.append('EnableRedirection', 'true');
-    url.searchParams.append('EnableRemoteMedia', 'false');
 
     return url.toString();
   }
@@ -150,9 +161,14 @@ export class MediaModule {
     } = options;
 
     const url = new URL(`${serverUrl}/Audio/${itemId}/master.m3u8`);
-    if (token && useQueryToken) url.searchParams.append('api_key', token);
+    if (token && useQueryToken) {
+      url.searchParams.append('api_key', token);
+      url.searchParams.append('X-Emby-Token', token);
+    }
     if (userId) url.searchParams.append('UserId', userId);
-    if (clientInfo.deviceId) url.searchParams.append('DeviceId', clientInfo.deviceId);
+
+    const targetDeviceId = options.deviceId !== undefined ? options.deviceId : clientInfo.deviceId;
+    if (targetDeviceId) url.searchParams.append('DeviceId', targetDeviceId);
 
     url.searchParams.append('MediaSourceId', itemId);
     url.searchParams.append('AudioCodec', audioCodec);
@@ -209,9 +225,14 @@ export class MediaModule {
       : `/Videos/${itemId}/stream`;
 
     const url = new URL(`${serverUrl}${endpoint}`);
-    if (token && useQueryToken) url.searchParams.append('api_key', token);
+    if (token && useQueryToken) {
+      url.searchParams.append('api_key', token);
+      url.searchParams.append('X-Emby-Token', token);
+    }
     if (userId) url.searchParams.append('UserId', userId);
-    if (clientInfo.deviceId) url.searchParams.append('DeviceId', clientInfo.deviceId);
+
+    const targetDeviceId = options.deviceId !== undefined ? options.deviceId : clientInfo.deviceId;
+    if (targetDeviceId) url.searchParams.append('DeviceId', targetDeviceId);
     if (mediaSourceId) url.searchParams.append('MediaSourceId', mediaSourceId);
 
     if (isStatic) {
@@ -280,9 +301,14 @@ export class MediaModule {
     } = options;
 
     const url = new URL(`${serverUrl}/Videos/${itemId}/master.m3u8`);
-    if (token && useQueryToken) url.searchParams.append('api_key', token);
+    if (token && useQueryToken) {
+      url.searchParams.append('api_key', token);
+      url.searchParams.append('X-Emby-Token', token);
+    }
     if (userId) url.searchParams.append('UserId', userId);
-    if (clientInfo.deviceId) url.searchParams.append('DeviceId', clientInfo.deviceId);
+
+    const targetDeviceId = options.deviceId !== undefined ? options.deviceId : clientInfo.deviceId;
+    if (targetDeviceId) url.searchParams.append('DeviceId', targetDeviceId);
     if (mediaSourceId) url.searchParams.append('MediaSourceId', mediaSourceId);
 
     url.searchParams.append('VideoCodec', videoCodec);

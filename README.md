@@ -3,9 +3,10 @@
 A modern, lightweight, modular, and type-safe Jellyfin SDK for Node.js and the Browser.
 
 [![npm version](https://img.shields.io/npm/v/@francofantomius/jellyfin.svg)](https://www.npmjs.com/package/@francofantomius/jellyfin)
+[![Documentation](https://img.shields.io/badge/docs-Material%20Design%203-6f42c1.svg)](https://francofantomius.github.io/jellyfin-sdk/)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-**Current Version: `v0.3.0`** (THE PROJECT IS BEING ACTIVELY DEVELOPED. WAIT FOR VERSION 0.5.0 TO USE IT)
+**Current Version: `v0.4.0`** (THE PROJECT IS BEING ACTIVELY DEVELOPED. WAIT FOR VERSION 0.5.0 TO USE IT)
 
 
 ---
@@ -32,6 +33,11 @@ A modern, lightweight, modular, and type-safe Jellyfin SDK for Node.js and the B
   - `client.websocket` - Real-time WebSocket event streaming, keep-alive heartbeat, and automated reconnection.
   - `client.sessions` - Remote control active sessions, playback commands, volume adjustment, and message modals.
   - `client.quickConnect` - Quick Connect pairing flow for TVs and secondary devices.
+  - `client.trickplay` - Jellyfin 10.9+ trickplay HLS tile manifests, image tiles, and scrubbing thumbnail coordinate calculations.
+  - `client.chapters` - Chapter navigation, preview thumbnails, typed MediaSegments, and intro/credits skipping.
+  - `client.genres` - Video genres, music genres, and production studios browsing.
+  - `client.collections` - BoxSet collection querying, creation, and item membership management.
+  - `client.displayPreferences` - Persist and retrieve view types, sorting configurations, and custom client UI preferences via `/DisplayPreferences/{id}`.
 - **Quality Settings & Presets**: Standard video (4K, 1080p, 720p, 480p, 360p, direct) and audio (320k, 256k, 192k, 128k, direct) presets and resolution utilities.
 - **Subtitles**: Direct VTT/SRT subtitle streaming URLs, raw text fetching, and automated track extraction from media metadata.
 - **Direct Downloads**: Server file download URLs, progress-tracked file downloads, and offline caching.
@@ -441,6 +447,83 @@ if (await client.quickConnect.isEnabled()) {
 // On an already authenticated device (e.g. phone or PC):
 await client.quickConnect.authorize('123 456');
 console.log('Device authorized!');
+```
+
+---
+
+### 17. Trickplay & Scrubbing Thumbnails
+
+```typescript
+// Fetch manifest and available resolutions
+const item = await client.library.getItem('video-id');
+const resolutions = client.trickplay.getAvailableResolutions(item); // e.g. [320]
+
+// Calculate exact sprite coordinates for scrubbing seekbar
+const thumbnail = client.trickplay.getThumbnailForTimestamp({
+  item,
+  timestampMs: 45000, // 45 seconds into the video
+  width: 320
+});
+
+if (thumbnail) {
+  console.log(`Image: ${thumbnail.imageUrl}`);
+  console.log(`Offset: x=${thumbnail.x}px, y=${thumbnail.y}px, size=${thumbnail.width}x${thumbnail.height}px`);
+}
+```
+
+---
+
+### 18. Chapters & Intro / Credits Skipping
+
+```typescript
+// Fetch item chapters and images
+const chapters = await client.chapters.getChapters('episode-id');
+const chapterImage = client.chapters.getChapterImageUrl('episode-id', 1, { maxWidth: 400 });
+
+// Detect intro/credits from /MediaSegments or chapter heuristics
+const markers = await client.chapters.getIntroCredits('episode-id');
+
+// During playback, check if skip button should appear
+const currentTicks = 850_000_000; // 85s
+const activeSegment = client.chapters.findCurrentSegment(currentTicks, markers);
+if (activeSegment?.type === 'Intro') {
+  const skipToTicks = client.chapters.getSkipPosition(currentTicks, markers);
+  console.log(`Skip Intro available -> Jump to ${skipToTicks / 10_000_000}s`);
+}
+```
+
+---
+
+### 19. Genres, Studios & BoxSet Collections
+
+```typescript
+// Browse genres and studios
+const movieGenres = await client.genres.getGenres({ limit: 20 });
+const rockMusic = await client.genres.getMusicGenre('Rock');
+const studios = await client.genres.getStudios({ searchTerm: 'Universal' });
+
+// Browse and manage BoxSet Collections
+const collections = await client.collections.getCollections();
+const newBoxSet = await client.collections.createCollection({
+  name: 'Alien Anthology',
+  ids: ['alien-1', 'alien-2']
+});
+await client.collections.addToCollection(newBoxSet.Id, ['alien-3', 'alien-4']);
+await client.collections.removeFromCollection(newBoxSet.Id, 'alien-1');
+```
+
+---
+
+### 20. User Display Preferences
+
+```typescript
+// Get folder/view UI preferences
+const prefs = await client.displayPreferences.getDisplayPreferences('folder-id');
+
+// Update view layout and sorting
+await client.displayPreferences.setViewType('folder-id', 'Poster');
+await client.displayPreferences.setSortPreferences('folder-id', 'CommunityRating', 'Descending');
+await client.displayPreferences.setCustomPreference('folder-id', 'showBadges', 'true');
 ```
 
 ---

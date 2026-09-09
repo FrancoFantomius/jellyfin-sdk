@@ -23,6 +23,11 @@ export { WebSocketModule } from './websocket.js';
 export type { WebSocketEventListener } from './websocket.js';
 export { SessionsModule } from './sessions.js';
 export { QuickConnectModule } from './quick-connect.js';
+export { TrickplayModule } from './trickplay.js';
+export { ChaptersModule } from './chapters.js';
+export { GenresModule } from './genres.js';
+export { CollectionsModule } from './collections.js';
+export { DisplayPreferencesModule } from './display-preferences.js';
 
 export {
   VIDEO_QUALITY_PRESETS,
@@ -119,5 +124,26 @@ export type {
   SessionMessageOptions,
   QuickConnectResult,
   QuickConnectState,
-  QuickConnectPollOptions
+  QuickConnectPollOptions,
+  TrickplayInfoDto,
+  TrickplayStreamOptions,
+  TrickplayManifestTile,
+  TrickplayManifestInfo,
+  ThumbnailLookupOptions,
+  ThumbnailLookupResult,
+  ChapterInfoDto,
+  ChapterImageOptions,
+  MediaSegmentType,
+  MediaSegmentDto,
+  GetMediaSegmentsOptions,
+  MarkerRange,
+  IntroCreditsMarkers,
+  GetGenresOptions,
+  GetStudiosOptions,
+  GetCollectionsOptions,
+  GetCollectionItemsOptions,
+  CreateCollectionOptions,
+  DisplayPreferencesDto,
+  GetDisplayPreferencesOptions,
+  UpdateDisplayPreferencesOptions
 } from './types.js';

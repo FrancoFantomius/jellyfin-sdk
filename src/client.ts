@@ -16,6 +16,11 @@ import { SearchModule } from './search.js';
 import { WebSocketModule } from './websocket.js';
 import { SessionsModule } from './sessions.js';
 import { QuickConnectModule } from './quick-connect.js';
+import { TrickplayModule } from './trickplay.js';
+import { ChaptersModule } from './chapters.js';
+import { GenresModule } from './genres.js';
+import { CollectionsModule } from './collections.js';
+import { DisplayPreferencesModule } from './display-preferences.js';
 import { CacheAdapter, MemoryCacheAdapter } from './cache.js';
 import { generateDeviceId, getDefaultStorage } from './storage.js';
 import type { ClientInfo, JellyfinClientOptions, StorageAdapter } from './types.js';
@@ -41,6 +46,11 @@ export class JellyfinClient {
   public readonly websocket: WebSocketModule;
   public readonly sessions: SessionsModule;
   public readonly quickConnect: QuickConnectModule;
+  public readonly trickplay: TrickplayModule;
+  public readonly chapters: ChaptersModule;
+  public readonly genres: GenresModule;
+  public readonly collections: CollectionsModule;
+  public readonly displayPreferences: DisplayPreferencesModule;
 
   private http: HttpTransport;
   private storage: StorageAdapter;
@@ -54,7 +64,7 @@ export class JellyfinClient {
 
     this.clientInfo = {
       name: options.clientInfo?.name || '@francofantomius/jellyfin',
-      version: options.clientInfo?.version || '0.3.0',
+      version: options.clientInfo?.version || '0.4.0',
       device: options.clientInfo?.device || (typeof window !== 'undefined' ? 'Web Browser' : 'Node.js'),
       deviceId: options.clientInfo?.deviceId || generateDeviceId()
     };
@@ -95,6 +105,11 @@ export class JellyfinClient {
     this.websocket = new WebSocketModule(this.http, getDeviceId);
     this.sessions = new SessionsModule(this.http, getUserId);
     this.quickConnect = new QuickConnectModule(this.http);
+    this.trickplay = new TrickplayModule(this.http);
+    this.chapters = new ChaptersModule(this.http, getUserId);
+    this.genres = new GenresModule(this.http, getUserId);
+    this.collections = new CollectionsModule(this.http, getUserId);
+    this.displayPreferences = new DisplayPreferencesModule(this.http, getUserId, this.clientInfo.name);
   }
 
   // --- Configuration Getters & Setters ---

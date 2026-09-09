@@ -135,7 +135,16 @@ export class HttpTransport {
     }
 
     if (!response.ok) {
-      throw new JellyfinApiError(`Jellyfin API request failed (${endpoint}): ${response.statusText}`, response.status, endpoint);
+      let details = '';
+      try {
+        const text = await response.text();
+        if (text) {
+          details = `: ${text.slice(0, 500)}`;
+        }
+      } catch {
+        // ignore
+      }
+      throw new JellyfinApiError(`Jellyfin API request failed (${endpoint}): ${response.statusText || response.status}${details}`, response.status, endpoint);
     }
 
     return response;

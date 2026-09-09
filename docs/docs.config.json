@@ -1,0 +1,7 @@
+{
+  "title": "@francofantomius/jellyfin",
+  "description": "A modern, lightweight, modular, and type-safe Jellyfin SDK for Node.js and the Browser.",
+  "githubUrl": "https://github.com/FrancoFantomius/jellyfin-sdk",
+  "baseUrl": "./"
+}
+

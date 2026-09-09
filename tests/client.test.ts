@@ -71,7 +71,7 @@ describe('JellyfinClient', () => {
     expect(eventListener).toHaveBeenCalled();
   });
 
-  it('should initialize all modules including v0.3.0 modules', () => {
+  it('should initialize all modules including v0.4.0 modules', () => {
     const client = new JellyfinClient({
       serverUrl: 'https://jellyfin.example.com',
       accessToken: 'token-123',
@@ -95,7 +95,12 @@ describe('JellyfinClient', () => {
     expect(client.websocket).toBeDefined();
     expect(client.sessions).toBeDefined();
     expect(client.quickConnect).toBeDefined();
-    expect(client.info.version).toBe('0.3.0');
+    expect(client.trickplay).toBeDefined();
+    expect(client.chapters).toBeDefined();
+    expect(client.genres).toBeDefined();
+    expect(client.collections).toBeDefined();
+    expect(client.displayPreferences).toBeDefined();
+    expect(client.info.version).toBe('0.4.0');
   });
 });
 

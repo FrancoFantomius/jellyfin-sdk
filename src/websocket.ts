@@ -9,7 +9,7 @@ import type {
   SessionInfoDto
 } from './types.js';
 
-export type WebSocketEventListener = (...args: unknown[]) => void;
+export type WebSocketEventListener = (...args: any[]) => void;
 
 export class WebSocketModule {
   private http: HttpTransport;
@@ -74,7 +74,7 @@ export class WebSocketModule {
     this.explicitlyClosed = false;
     this.cleanup();
 
-    const socketUrl = this.getWebSocketUrl();
+    const socketUrl = this.options.url || this.getWebSocketUrl();
 
     let SocketConstructor: any = this.options.webSocketFactory
       ? null

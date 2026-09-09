@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-09-09
+
+### Added
+- **Trickplay & Scrubbing Thumbnails**:
+  - `TrickplayModule` (`src/trickplay.ts`) supporting Jellyfin 10.9+ trickplay tile HLS manifests (`/Videos/{itemId}/Trickplay/{width}/tiles.m3u8`) and individual tile image sheets (`/Videos/{itemId}/Trickplay/{width}/{index}.jpg`).
+  - Playlist manifest fetching and parsing via `client.trickplay.getTrickplayManifest()`.
+  - Available resolution and metadata discovery from `item.Trickplay` via `getAvailableResolutions()` and `getTrickplayInfo()`.
+  - Precise timestamp-to-sprite coordinate calculations via `getThumbnailForTimestamp()` providing sheet index, image URL, and sprite clipping coordinates `(x, y, width, height)` for player seekbar scrub previews.
+- **Chapters, Media Markers & Intro/Credits Skipping**:
+  - `ChaptersModule` (`src/chapters.ts`) providing chapter extraction and preview image URLs (`/Items/{id}/Images/Chapter/{index}`).
+  - MediaSegments API integration via `client.chapters.getMediaSegments()` querying typed segments (`Intro`, `Outro`, `Commercial`, `Recap`).
+  - Automated intro and end-credits resolution via `client.chapters.getIntroCredits()` supporting both `/MediaSegments` (Jellyfin 10.10+) and chapter marker heuristics (`MarkerType` and naming patterns).
+  - Playback position evaluation via `findCurrentSegment()` and `getSkipPosition()`.
+- **Collections & Genres Browsing**:
+  - `GenresModule` (`src/genres.ts`) querying video genres (`/Genres`), music genres (`/MusicGenres`), and studios (`/Studios`).
+  - `CollectionsModule` (`src/collections.ts`) managing BoxSets: querying collections (`/Collections`), querying collection items (`getCollectionItems`), creating new BoxSets (`createCollection`), and modifying membership (`addToCollection`, `removeFromCollection`).
+- **User Display Preferences**:
+  - `DisplayPreferencesModule` (`src/display-preferences.ts`) managing UI view configurations via `GET/POST /DisplayPreferences/{id}`.
+  - Convenience helpers: `setCustomPreference()`, `setSortPreferences()`, and `setViewType()`.
+- **Client Integration**:
+  - Attached sub-modules directly to `JellyfinClient`: `client.trickplay`, `client.chapters`, `client.genres`, `client.collections`, and `client.displayPreferences`.
+  - Bumped default client version to `0.4.0`.
+- **Streaming & HTTP Enhancements**:
+  - `MediaModule` now supports static audio streaming (`/Audio/{itemId}/stream`), dual query token appending (`api_key` & `X-Emby-Token`), and device ID overrides.
+  - `HttpTransport` extracts and formats server error response bodies in `JellyfinApiError` for easier debugging.
+  - `AuthModule` expanded default supported remote commands (`MoveUp`, `MoveDown`, `MoveLeft`, `MoveRight`, `Select`, `Back`, `VolumeUp`, `VolumeDown`, `Mute`, `Unmute`, `ToggleMute`, `SetVolume`, `DisplayMessage`).
+- **Interactive Documentation Site**:
+  - Material Design 3 interactive static documentation portal in `docs/` with live search, code copy buttons, and responsive navigation.
+  - GitHub Actions workflow (`.github/workflows/deploy-docs.yml`) for automated GitHub Pages deployment.
+- **Documentation & Tests**:
+  - Full documentation across `llms.txt` and `docs/api/` (`trickplay.md`, `chapters-and-markers.md`, `genres-and-collections.md`, `display-preferences.md`).
+  - Added unit test suites: `tests/trickplay.test.ts`, `tests/chapters.test.ts`, `tests/genres.test.ts`, `tests/collections.test.ts`, and `tests/display-preferences.test.ts`.
+
 ## [0.3.0] - 2026-09-09
 
 ### Added

@@ -74,11 +74,22 @@ export class AuthModule {
     const payload: ClientCapabilities = {
       PlayableMediaTypes: ['Audio', 'Video'],
       SupportedCommands: [
-        'Play',
+        'MoveUp',
+        'MoveDown',
+        'MoveLeft',
+        'MoveRight',
+        'Select',
+        'Back',
+        'VolumeUp',
+        'VolumeDown',
+        'Mute',
+        'Unmute',
+        'ToggleMute',
+        'SetVolume',
         'PlayState',
-        'PlayNext',
         'SetRepeatMode',
-        'SetShuffleQueue'
+        'SetShuffleQueue',
+        'DisplayMessage'
       ],
       SupportsMediaControl: true,
       SupportsSync: false,

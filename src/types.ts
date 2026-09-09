@@ -164,6 +164,15 @@ export interface BaseItemDto {
   MediaSources?: MediaSourceInfo[];
   HasLyrics?: boolean;
   /**
+   * Trickplay thumbnail metadata dictionary (Jellyfin 10.9+).
+   * Keyed by MediaSourceId -> Width string -> TrickplayInfoDto.
+   */
+  Trickplay?: Record<string, Record<string, TrickplayInfoDto>> | null;
+  /**
+   * Chapter markers associated with the media item.
+   */
+  Chapters?: ChapterInfoDto[];
+  /**
    * Unique relational playlist entry ID (Jellyfin 12+).
    * Distinguishes duplicate tracks inside the same playlist.
    */
@@ -272,12 +281,14 @@ export interface UpdatePlaylistOptions {
 }
 
 export interface AudioStreamOptions {
+  static?: boolean;
   maxStreamingBitrate?: string | number;
   quality?: AudioQualityPresetKey | AudioQualityOption | number | string;
   startTimeTicks?: number;
   container?: string;
   transcodingContainer?: string;
   audioCodec?: string;
+  deviceId?: string;
   /**
    * Whether to include the api_key token in the URL query parameters.
    * Defaults to true for HTML5 <audio> tag compatibility.
@@ -292,6 +303,7 @@ export interface AudioHlsStreamOptions {
   startTimeTicks?: number;
   audioCodec?: string;
   segmentLength?: number;
+  deviceId?: string;
   /**
    * Whether to include the api_key token in the URL query parameters.
    * Defaults to true for legacy compatibility.
@@ -445,6 +457,7 @@ export interface VideoStreamOptions {
   container?: string;
   transcodingContainer?: string;
   transcodingProtocol?: string;
+  deviceId?: string;
   useQueryToken?: boolean;
 }
 
@@ -457,14 +470,15 @@ export interface VideoHlsStreamOptions {
   maxWidth?: number;
   maxHeight?: number;
   maxFramerate?: number;
-  segmentLength?: number;
-  minSegments?: number;
   audioStreamIndex?: number;
   subtitleStreamIndex?: number;
   subtitleMethod?: 'Embed' | 'Encode' | 'Hls' | 'External';
+  startTimeTicks?: number;
+  segmentLength?: number;
+  minSegments?: number;
   transcodingContainer?: 'ts' | 'fmp4' | string;
   transcodingProtocol?: 'hls';
-  startTimeTicks?: number;
+  deviceId?: string;
   useQueryToken?: boolean;
 }
 
@@ -593,6 +607,7 @@ export interface UserDataChangedData {
 }
 
 export interface WebSocketModuleOptions {
+  url?: string;
   autoReconnect?: boolean;
   reconnectIntervalMs?: number;
   maxReconnectAttempts?: number;
@@ -724,6 +739,199 @@ export interface QuickConnectPollOptions {
   intervalMs?: number;
   timeoutMs?: number;
   signal?: AbortSignal;
+}
+
+// --- Milestone 3: Rich Media Navigation & Metadata ---
+
+/**
+ * Metadata describing generated trickplay tiles for scrubbing previews (Jellyfin 10.9+).
+ */
+export interface TrickplayInfoDto {
+  Width: number;
+  Height: number;
+  TileWidth: number;
+  TileHeight: number;
+  ThumbnailCount: number;
+  Interval: number;
+  Bandwidth: number;
+}
+
+export interface TrickplayStreamOptions {
+  mediaSourceId?: string;
+  useQueryToken?: boolean;
+}
+
+export interface TrickplayManifestTile {
+  index: number;
+  durationMs: number;
+  url: string;
+}
+
+export interface TrickplayManifestInfo {
+  width: number;
+  rawM3u8: string;
+  tiles: TrickplayManifestTile[];
+}
+
+export interface ThumbnailLookupOptions {
+  item?: BaseItemDto;
+  trickplayInfo?: TrickplayInfoDto;
+  timestampMs?: number;
+  timestampTicks?: number;
+  width?: number;
+  mediaSourceId?: string;
+  useQueryToken?: boolean;
+}
+
+export interface ThumbnailLookupResult {
+  tileIndex: number;
+  imageUrl: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  thumbnailIndex: number;
+}
+
+/**
+ * Chapter marker within a media item.
+ */
+export interface ChapterInfoDto {
+  StartPositionTicks: number;
+  Name?: string;
+  ImageTag?: string;
+  ImagePath?: string;
+  ImageDateModified?: string;
+  MarkerType?: 'IntroStart' | 'IntroEnd' | 'CreditsStart' | 'CreditsEnd' | (string & {});
+}
+
+export interface ChapterImageOptions {
+  maxWidth?: number;
+  maxHeight?: number;
+  width?: number;
+  height?: number;
+  quality?: number;
+  format?: 'jpg' | 'png' | 'webp';
+  tag?: string;
+  fillWidth?: number;
+  fillHeight?: number;
+  useQueryToken?: boolean;
+}
+
+export type MediaSegmentType =
+  | 'Intro'
+  | 'Outro'
+  | 'Preview'
+  | 'Recap'
+  | 'Commercial'
+  | (string & {});
+
+export interface MediaSegmentDto {
+  Id: string;
+  ItemId: string;
+  Type: MediaSegmentType;
+  StartTicks: number;
+  EndTicks: number;
+}
+
+export interface GetMediaSegmentsOptions {
+  includeSegmentTypes?: MediaSegmentType[];
+}
+
+export interface MarkerRange {
+  startTicks: number;
+  endTicks: number;
+  startMs: number;
+  endMs: number;
+}
+
+export interface IntroCreditsMarkers {
+  intro?: MarkerRange;
+  credits?: MarkerRange;
+  segments: MediaSegmentDto[];
+}
+
+export interface GetGenresOptions {
+  parentId?: string;
+  startIndex?: number;
+  limit?: number;
+  searchTerm?: string;
+  sortBy?: string;
+  sortOrder?: 'Ascending' | 'Descending';
+  enableImages?: boolean;
+  imageTypeLimit?: number;
+  enableImageTypes?: string[];
+  userId?: string;
+}
+
+export interface GetStudiosOptions {
+  parentId?: string;
+  startIndex?: number;
+  limit?: number;
+  searchTerm?: string;
+  sortBy?: string;
+  sortOrder?: 'Ascending' | 'Descending';
+  enableImages?: boolean;
+  imageTypeLimit?: number;
+  enableImageTypes?: string[];
+  userId?: string;
+}
+
+export interface GetCollectionsOptions {
+  parentId?: string;
+  startIndex?: number;
+  limit?: number;
+  searchTerm?: string;
+  sortBy?: string;
+  sortOrder?: 'Ascending' | 'Descending';
+  enableImages?: boolean;
+  imageTypeLimit?: number;
+  enableImageTypes?: string[];
+  userId?: string;
+}
+
+export interface GetCollectionItemsOptions {
+  userId?: string;
+  startIndex?: number;
+  limit?: number;
+  fields?: string;
+  sortBy?: string;
+  sortOrder?: 'Ascending' | 'Descending';
+}
+
+export interface CreateCollectionOptions {
+  name: string;
+  ids?: string[];
+  parentId?: string;
+  isFolder?: boolean;
+}
+
+export interface DisplayPreferencesDto {
+  Id?: string;
+  ViewType?: string;
+  SortBy?: string;
+  IndexBy?: string;
+  RememberIndexing?: boolean;
+  PrimaryImageHeight?: number;
+  PrimaryImageWidth?: number;
+  CustomPrefs?: Record<string, string>;
+  ScrollDirection?: 'Horizontal' | 'Vertical' | (string & {});
+  ShowBackdrop?: boolean;
+  RememberSorting?: boolean;
+  SortOrder?: 'Ascending' | 'Descending' | (string & {});
+  ShowSidebar?: boolean;
+  Client?: string;
+  [key: string]: unknown;
+}
+
+export interface GetDisplayPreferencesOptions {
+  userId?: string;
+  client?: string;
+}
+
+export interface UpdateDisplayPreferencesOptions {
+  userId?: string;
+  client?: string;
 }
 
 export type {
