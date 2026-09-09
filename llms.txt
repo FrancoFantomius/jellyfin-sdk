@@ -8,6 +8,7 @@
 - Target Environment: Universal / Isomorphic (Node.js 18+, Bun, Deno, modern Browsers)
 - Formats: Dual ESM (`dist/index.js`) and CJS (`dist/index.cjs`), with TypeScript type declarations (`dist/index.d.ts`).
 - License: MIT
+- Repository: `https://github.com/FrancoFantomius/jellyfin-sdk`
 
 ## Core Architecture
 - **JellyfinClient (`src/client.ts`)**: The unified entry point coordinating all modular client sub-modules.
