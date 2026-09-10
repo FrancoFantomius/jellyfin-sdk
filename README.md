@@ -6,7 +6,7 @@ A modern, lightweight, modular, and type-safe Jellyfin SDK for Node.js and the B
 [![Documentation](https://img.shields.io/badge/docs-Material%20Design%203-6f42c1.svg)](https://francofantomius.github.io/jellyfin-sdk/)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-**Current Version: `v0.4.0`** (THE PROJECT IS BEING ACTIVELY DEVELOPED. WAIT FOR VERSION 0.5.0 TO USE IT)
+**Current Version: `v0.4.1`** (THE PROJECT IS BEING ACTIVELY DEVELOPED. WAIT FOR VERSION 0.5.0 TO USE IT)
 
 
 ---

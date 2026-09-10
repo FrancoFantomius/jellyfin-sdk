@@ -43,17 +43,42 @@ const hlsUrl = client.media.getVideoHlsStreamUrl('movie-id', {
 ## Audio Streaming
 
 ### `getAudioStreamUrl(itemId, options?)`
-Builds audio stream URL (`/Audio/{itemId}/stream`).
+Builds progressive or universal audio stream URL (`/Audio/{itemId}/stream` or `/Audio/{itemId}/universal`).
+
+Appends `ApiKey`, `api_key`, and `X-Emby-Token` query parameters for full compatibility across Jellyfin 10, 11, and 12. Set `useQueryToken: false` when authenticating via `Authorization` headers.
 
 ```typescript
 const audioUrl = client.media.getAudioStreamUrl('song-id', {
   quality: '320k',
-  container: 'opus,mp3'
+  container: 'opus,mp3',
+  mediaSourceId: 'specific-source-id', // Optional: explicitly specify media source
+  useQueryToken: true                 // Set to false when using Authorization headers
 });
 ```
 
 ### `getAudioHlsStreamUrl(itemId, options?)`
-Builds audio HLS stream URL (`/Audio/{itemId}/master.m3u8`).
+Builds audio HLS master playlist URL (`/Audio/{itemId}/master.m3u8`).
+
+Only includes `MediaSourceId` if explicitly provided via `options.mediaSourceId` (preventing 400/404/500 errors from item ID mismatches).
+
+```typescript
+const hlsAudioUrl = client.media.getAudioHlsStreamUrl('song-id', {
+  quality: '320k',
+  mediaSourceId: 'specific-source-id', // Optional
+  useQueryToken: false                 // Recommended when HLS player provides Authorization headers
+});
+```
+
+### `getStreamHeaders(options?)`
+Returns authentication headers for player requests (such as hls.js `xhrSetup`).
+
+```typescript
+// Includes Authorization and X-Emby-Authorization
+const headers = client.media.getStreamHeaders();
+
+// Jellyfin 12+ modern header only (avoids conflicting auth and reverse proxy CORS issues)
+const modernHeaders = client.media.getStreamHeaders({ legacy: false });
+```
 
 ---
 

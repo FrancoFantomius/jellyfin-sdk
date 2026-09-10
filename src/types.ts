@@ -289,10 +289,11 @@ export interface AudioStreamOptions {
   transcodingContainer?: string;
   audioCodec?: string;
   deviceId?: string;
+  mediaSourceId?: string;
   /**
-   * Whether to include the api_key token in the URL query parameters.
+   * Whether to include the authentication token in the URL query parameters (ApiKey, api_key, X-Emby-Token).
    * Defaults to true for HTML5 <audio> tag compatibility.
-   * If false, callers are expected to provide Authorization headers.
+   * Set to false when providing modern Authorization headers to avoid conflicting authentication credentials in Jellyfin 12+.
    */
   useQueryToken?: boolean;
 }
@@ -304,10 +305,11 @@ export interface AudioHlsStreamOptions {
   audioCodec?: string;
   segmentLength?: number;
   deviceId?: string;
+  mediaSourceId?: string;
   /**
-   * Whether to include the api_key token in the URL query parameters.
+   * Whether to include the authentication token in the URL query parameters (ApiKey, api_key, X-Emby-Token).
    * Defaults to true for legacy compatibility.
-   * If false, players (e.g. hls.js) should be configured with Authorization headers via xhrSetup.
+   * Set to false when players (e.g. hls.js) are configured with Authorization headers via xhrSetup to prevent 401s from conflicting auth methods in Jellyfin 12+.
    */
   useQueryToken?: boolean;
 }

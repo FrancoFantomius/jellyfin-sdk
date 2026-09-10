@@ -43,7 +43,7 @@ It targets both Jellyfin 10.x and Jellyfin 12.x server architectures with automa
 ## Package Metadata & Installation
 
 - **Package Name**: `@francofantomius/jellyfin`
-- **Version**: `0.4.0`
+- **Version**: `0.4.1`
 - **Runtime Support**: Node.js 18+, Bun, Deno, modern web browsers
 - **Module Formats**: Native ESM (`dist/index.js`), CommonJS (`dist/index.cjs`), TypeScript Declarations (`dist/index.d.ts`)
 - **Dependencies**: 0 production dependencies (zero bloat)
@@ -234,10 +234,11 @@ Documented in: `docs/api/library.md`
 Documented in: `docs/api/media.md`, `docs/guides/streaming-and-media.md`
 
 #### Progressive & Adaptive Streams
-- `getVideoStreamUrl(itemId, options?)`: Direct play (`static: true`) or progressive transcode stream URL (`/Videos/{itemId}/stream`). Supports `quality`, `audioStreamIndex`, `subtitleStreamIndex`, `subtitleMethod` (`'Encode' | 'Embed' | 'External'`).
-- `getVideoHlsStreamUrl(itemId, options?)`: Master HLS playlist URL (`/Videos/{itemId}/master.m3u8`) with `segmentLength` and quality presets.
-- `getAudioStreamUrl(itemId, options?)`: Progressive audio stream URL (`/Audio/{itemId}/stream`) with container and bitrate settings.
-- `getAudioHlsStreamUrl(itemId, options?)`: Adaptive audio HLS URL (`/Audio/{itemId}/master.m3u8`).
+- `getVideoStreamUrl(itemId, options?)`: Direct play (`static: true`) or progressive transcode stream URL (`/Videos/{itemId}/stream`). Supports `quality`, `audioStreamIndex`, `subtitleStreamIndex`, `subtitleMethod` (`'Encode' | 'Embed' | 'External'`), `useQueryToken`. Appends `ApiKey`, `api_key`, `X-Emby-Token`.
+- `getVideoHlsStreamUrl(itemId, options?)`: Master HLS playlist URL (`/Videos/{itemId}/master.m3u8`) with `segmentLength`, quality presets, `useQueryToken`.
+- `getAudioStreamUrl(itemId, options?)`: Progressive audio stream URL (`/Audio/{itemId}/stream` or `/Audio/{itemId}/universal`) with container, bitrate, optional explicit `mediaSourceId`, and `useQueryToken`.
+- `getAudioHlsStreamUrl(itemId, options?)`: Adaptive audio HLS URL (`/Audio/{itemId}/master.m3u8`). Only appends `MediaSourceId` if explicitly specified via `options.mediaSourceId` (no unsafe fallback to item ID). Supports `useQueryToken: false` for header-based auth.
+- `getStreamHeaders(options?)`: Returns `{ Authorization, ['X-Emby-Authorization'] }`. Pass `{ legacy: false }` to omit legacy `X-Emby-*` headers and prevent auth conflict / CORS preflight issues on Jellyfin 12+.
 
 #### Subtitle Extraction & Streaming
 - `getSubtitleTracks(item)`: Normalizes subtitle tracks from `item.MediaStreams` into structured `SubtitleTrackInfo` objects (`index`, `language`, `displayTitle`, `codec`, `isDefault`, `isForced`, `url`).

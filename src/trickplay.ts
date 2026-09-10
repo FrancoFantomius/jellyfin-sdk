@@ -28,6 +28,7 @@ export class TrickplayModule {
 
     const url = new URL(`${serverUrl}/Videos/${itemId}/Trickplay/${width}/tiles.m3u8`);
     if (token && useQueryToken) {
+      url.searchParams.append('ApiKey', token);
       url.searchParams.append('api_key', token);
       url.searchParams.append('X-Emby-Token', token);
     }
@@ -49,6 +50,7 @@ export class TrickplayModule {
 
     const url = new URL(`${serverUrl}/Videos/${itemId}/Trickplay/${width}/${index}.jpg`);
     if (token && useQueryToken) {
+      url.searchParams.append('ApiKey', token);
       url.searchParams.append('api_key', token);
       url.searchParams.append('X-Emby-Token', token);
     }

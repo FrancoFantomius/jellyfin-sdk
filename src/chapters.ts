@@ -68,6 +68,7 @@ export class ChaptersModule {
     const url = new URL(`${serverUrl}/Items/${itemId}/Images/Chapter/${chapterIndex}`);
 
     if (token && useQueryToken) {
+      url.searchParams.append('ApiKey', token);
       url.searchParams.append('api_key', token);
       url.searchParams.append('X-Emby-Token', token);
     }

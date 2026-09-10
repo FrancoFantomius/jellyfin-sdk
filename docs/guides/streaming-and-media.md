@@ -95,14 +95,45 @@ Available Video Presets:
 
 ## 3. Audio Streaming
 
-Generate direct or transcoded universal audio stream URLs for audio players:
+Generate direct or transcoded universal audio stream URLs or adaptive HLS master playlists for audio players:
 
 ```typescript
+// Direct / Universal progressive audio stream
 const audioUrl = client.media.getAudioStreamUrl('song-item-id', {
   quality: '320k', // Preset or pass maxStreamingBitrate directly
   container: 'opus,mp3,aac',
   startTimeTicks: 0
 });
+
+// Adaptive HLS audio stream (e.g. for Hls.js)
+const hlsUrl = client.media.getAudioHlsStreamUrl('song-item-id', {
+  quality: '320k',
+  useQueryToken: false // Recommended when setting Authorization headers via xhrSetup
+});
+```
+
+### Modern Authentication with Streaming Engines (Hls.js / Video.js)
+
+On Jellyfin 12+, legacy query parameters (`api_key`, `X-Emby-Token`) and legacy headers (`X-Emby-Authorization`) can conflict or be rejected when legacy authorization is disabled. To configure an HLS player cleanly:
+
+```typescript
+import Hls from 'hls.js';
+
+const hlsUrl = client.media.getAudioHlsStreamUrl(trackId, {
+  useQueryToken: false // Do not put token query params in the URL
+});
+
+const hls = new Hls({
+  xhrSetup: (xhr) => {
+    // Send modern Jellyfin 12 Authorization header only
+    const headers = client.media.getStreamHeaders({ legacy: false });
+    for (const [key, value] of Object.entries(headers)) {
+      xhr.setRequestHeader(key, value);
+    }
+  }
+});
+
+hls.loadSource(hlsUrl);
 ```
 
 ---

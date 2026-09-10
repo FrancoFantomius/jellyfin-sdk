@@ -100,7 +100,7 @@ describe('JellyfinClient', () => {
     expect(client.genres).toBeDefined();
     expect(client.collections).toBeDefined();
     expect(client.displayPreferences).toBeDefined();
-    expect(client.info.version).toBe('0.4.0');
+    expect(client.info.version).toBe('0.4.1');
   });
 });
 

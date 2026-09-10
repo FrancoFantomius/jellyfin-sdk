@@ -3,10 +3,10 @@ title: Home
 category: Overview
 order: 0
 icon: home
-badge: "v0.4.0"
+badge: "v0.4.1"
 description: "A modern, lightweight, modular, and type-safe Jellyfin SDK for Node.js and the Browser."
 hero:
-  badge: "Version 0.4.0 • TypeScript & Universal"
+  badge: "Version 0.4.1 • TypeScript & Universal"
   title: "@francofantomius/jellyfin"
   subtitle: "A modern, lightweight, modular, and type-safe Jellyfin SDK for Node.js and the Browser."
   actions:

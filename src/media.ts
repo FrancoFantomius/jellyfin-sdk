@@ -98,6 +98,7 @@ export class MediaModule {
     const maxStreamingBitrate = options.maxStreamingBitrate ?? qualityResolved.maxStreamingBitrate;
 
     const {
+      mediaSourceId,
       static: isStatic = false,
       startTimeTicks = 0,
       container = 'opus,mp3|mp3,aac,m4a,m4b,flac,wav,ogg',
@@ -110,6 +111,7 @@ export class MediaModule {
     const url = new URL(`${serverUrl}${endpoint}`);
 
     if (token && useQueryToken) {
+      url.searchParams.append('ApiKey', token);
       url.searchParams.append('api_key', token);
       url.searchParams.append('X-Emby-Token', token);
     }
@@ -117,6 +119,7 @@ export class MediaModule {
 
     const targetDeviceId = options.deviceId !== undefined ? options.deviceId : clientInfo.deviceId;
     if (targetDeviceId) url.searchParams.append('DeviceId', targetDeviceId);
+    if (mediaSourceId) url.searchParams.append('MediaSourceId', mediaSourceId);
 
     if (isStatic) {
       url.searchParams.append('static', 'true');
@@ -154,6 +157,7 @@ export class MediaModule {
     const maxStreamingBitrate = options.maxStreamingBitrate ?? qualityResolved.maxStreamingBitrate;
 
     const {
+      mediaSourceId,
       startTimeTicks = 0,
       audioCodec = 'aac,mp3',
       segmentLength = 3,
@@ -162,6 +166,7 @@ export class MediaModule {
 
     const url = new URL(`${serverUrl}/Audio/${itemId}/master.m3u8`);
     if (token && useQueryToken) {
+      url.searchParams.append('ApiKey', token);
       url.searchParams.append('api_key', token);
       url.searchParams.append('X-Emby-Token', token);
     }
@@ -170,7 +175,9 @@ export class MediaModule {
     const targetDeviceId = options.deviceId !== undefined ? options.deviceId : clientInfo.deviceId;
     if (targetDeviceId) url.searchParams.append('DeviceId', targetDeviceId);
 
-    url.searchParams.append('MediaSourceId', itemId);
+    if (mediaSourceId) {
+      url.searchParams.append('MediaSourceId', mediaSourceId);
+    }
     url.searchParams.append('AudioCodec', audioCodec);
     url.searchParams.append('TranscodingContainer', 'ts');
     url.searchParams.append('TranscodingProtocol', 'hls');
@@ -226,6 +233,7 @@ export class MediaModule {
 
     const url = new URL(`${serverUrl}${endpoint}`);
     if (token && useQueryToken) {
+      url.searchParams.append('ApiKey', token);
       url.searchParams.append('api_key', token);
       url.searchParams.append('X-Emby-Token', token);
     }
@@ -302,6 +310,7 @@ export class MediaModule {
 
     const url = new URL(`${serverUrl}/Videos/${itemId}/master.m3u8`);
     if (token && useQueryToken) {
+      url.searchParams.append('ApiKey', token);
       url.searchParams.append('api_key', token);
       url.searchParams.append('X-Emby-Token', token);
     }
@@ -357,6 +366,7 @@ export class MediaModule {
     const sourceId = mediaSourceId || itemId;
     const url = new URL(`${serverUrl}/Videos/${itemId}/${sourceId}/Subtitles/${subtitleStreamIndex}/Stream.${format}`);
     if (token && useQueryToken) {
+      url.searchParams.append('ApiKey', token);
       url.searchParams.append('api_key', token);
     }
     if (startTimeTicks > 0) {
@@ -448,6 +458,7 @@ export class MediaModule {
 
     const url = new URL(`${serverUrl}/Items/${itemId}/Download`);
     if (token && useQueryToken) {
+      url.searchParams.append('ApiKey', token);
       url.searchParams.append('api_key', token);
     }
     if (filename) {
@@ -507,12 +518,16 @@ export class MediaModule {
   /**
    * Returns authentication headers for media streaming requests (e.g., configuring hls.js xhrSetup).
    * Crucial for Jellyfin 12+ servers where query-based auth (?api_key=) is disabled.
+   * Pass { legacy: false } to only send Authorization and avoid conflicting headers or reverse-proxy CORS rejections.
    */
-  getStreamHeaders(): Record<string, string> {
+  getStreamHeaders(options: { legacy?: boolean } = {}): Record<string, string> {
     const authHeader = this.http.getAuthHeader();
-    return {
-      Authorization: authHeader,
-      'X-Emby-Authorization': authHeader
+    const headers: Record<string, string> = {
+      Authorization: authHeader
     };
+    if (options.legacy ?? true) {
+      headers['X-Emby-Authorization'] = authHeader;
+    }
+    return headers;
   }
 }

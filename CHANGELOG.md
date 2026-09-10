@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-09-10
+
+### Fixed
+- **Audio HLS Master Playlist MediaSourceId Handling**:
+  - Fixed an issue in `client.media.getAudioHlsStreamUrl()` where `MediaSourceId` previously defaulted to `itemId`, which could cause 400, 404, or 500 errors on Jellyfin servers when the primary media source ID does not match the item ID. `MediaSourceId` is now only appended when explicitly supplied via `options.mediaSourceId`.
+
+### Added
+- **Multi-Token Parameter Streaming Compatibility**:
+  - `ApiKey` query parameter is now appended alongside `api_key` and `X-Emby-Token` across media endpoints (`getAudioStreamUrl`, `getAudioHlsStreamUrl`, `getVideoStreamUrl`, `getVideoHlsStreamUrl`, `getSubtitleUrl`, `getDownloadUrl`, `getTrickplayManifestUrl`, `getThumbnailUrl`, `getChapterImageUrl`), guaranteeing seamless token detection across Jellyfin 10.x, 11.x, and 12.x servers.
+- **Audio MediaSourceId Customization**:
+  - Added `mediaSourceId?: string` option to `AudioStreamOptions` (`client.media.getAudioStreamUrl`) and `AudioHlsStreamOptions` (`client.media.getAudioHlsStreamUrl`) allowing callers to explicitly target specific media source streams.
+- **Configurable Legacy Authorization Headers**:
+  - `client.media.getStreamHeaders()` accepts an optional `{ legacy?: boolean }` argument (defaults to `true`). Setting `{ legacy: false }` produces only the standard `Authorization` header without `X-Emby-Authorization`, preventing 401 credential conflicts and CORS preflight rejections with reverse proxies on Jellyfin 12+.
+- **Package Distribution**:
+  - Added `llms.txt` to the packaged npm distribution `files` list in `package.json`.
+
+### Documentation
+- Updated `llms.txt`, `docs/api/media.md`, and `docs/guides/streaming-and-media.md` with modern streaming player integration patterns (Hls.js / Video.js) using header-based authentication and explicit `mediaSourceId`.
+
 ## [0.4.0] - 2026-09-09
 
 ### Added

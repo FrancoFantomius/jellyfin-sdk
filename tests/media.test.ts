@@ -18,7 +18,9 @@ describe('MediaModule', () => {
     const url = new URL(urlStr);
     expect(url.origin).toBe('https://jellyfin.example.com');
     expect(url.pathname).toBe('/Audio/track-1/universal');
+    expect(url.searchParams.get('ApiKey')).toBe('token-abc');
     expect(url.searchParams.get('api_key')).toBe('token-abc');
+    expect(url.searchParams.get('X-Emby-Token')).toBe('token-abc');
     expect(url.searchParams.get('UserId')).toBe('user-xyz');
     expect(url.searchParams.get('DeviceId')).toBe('dev-123');
     expect(url.searchParams.get('MaxStreamingBitrate')).toBe('320000');
@@ -63,20 +65,37 @@ describe('MediaModule', () => {
     expect(client.media.getArtworkUrl(item, { fallbackUrl: 'https://fallback.com/icon.png' })).toBe('https://fallback.com/icon.png');
   });
 
-  it('should generate HLS audio stream URL', () => {
+  it('should generate HLS audio stream URL without default MediaSourceId fallback', () => {
     const urlStr = client.media.getAudioHlsStreamUrl('track-10');
     const url = new URL(urlStr);
     expect(url.pathname).toBe('/Audio/track-10/master.m3u8');
-    expect(url.searchParams.get('MediaSourceId')).toBe('track-10');
+    expect(url.searchParams.get('ApiKey')).toBe('token-abc');
+    expect(url.searchParams.get('api_key')).toBe('token-abc');
+    expect(url.searchParams.get('X-Emby-Token')).toBe('token-abc');
+    expect(url.searchParams.has('MediaSourceId')).toBe(false);
     expect(url.searchParams.get('TranscodingProtocol')).toBe('hls');
   });
 
-  it('should omit api_key query param when useQueryToken is false (Jellyfin 12 header auth mode)', () => {
+  it('should append MediaSourceId when explicitly provided to audio methods', () => {
+    const hlsUrl = client.media.getAudioHlsStreamUrl('track-10', { mediaSourceId: 'source-999' });
+    expect(new URL(hlsUrl).searchParams.get('MediaSourceId')).toBe('source-999');
+
+    const streamUrl = client.media.getAudioStreamUrl('track-10', { mediaSourceId: 'source-999' });
+    expect(new URL(streamUrl).searchParams.get('MediaSourceId')).toBe('source-999');
+  });
+
+  it('should omit token query params when useQueryToken is false (Jellyfin 12 header auth mode)', () => {
     const directUrl = client.media.getAudioStreamUrl('track-1', { useQueryToken: false });
-    expect(new URL(directUrl).searchParams.has('api_key')).toBe(false);
+    const directParsed = new URL(directUrl);
+    expect(directParsed.searchParams.has('ApiKey')).toBe(false);
+    expect(directParsed.searchParams.has('api_key')).toBe(false);
+    expect(directParsed.searchParams.has('X-Emby-Token')).toBe(false);
 
     const hlsUrl = client.media.getAudioHlsStreamUrl('track-1', { useQueryToken: false });
-    expect(new URL(hlsUrl).searchParams.has('api_key')).toBe(false);
+    const hlsParsed = new URL(hlsUrl);
+    expect(hlsParsed.searchParams.has('ApiKey')).toBe(false);
+    expect(hlsParsed.searchParams.has('api_key')).toBe(false);
+    expect(hlsParsed.searchParams.has('X-Emby-Token')).toBe(false);
   });
 
   it('should return valid streaming authorization headers with getStreamHeaders', () => {
@@ -84,6 +103,10 @@ describe('MediaModule', () => {
     expect(headers.Authorization).toContain('MediaBrowser');
     expect(headers.Authorization).toContain('Token="token-abc"');
     expect(headers['X-Emby-Authorization']).toBe(headers.Authorization);
+
+    const modernHeaders = client.media.getStreamHeaders({ legacy: false });
+    expect(modernHeaders.Authorization).toContain('MediaBrowser');
+    expect(modernHeaders['X-Emby-Authorization']).toBeUndefined();
   });
 });
 
