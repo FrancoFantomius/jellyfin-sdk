@@ -11,7 +11,10 @@ export interface RequestOptions {
 
 export function cleanUrl(url: string): string {
   if (!url) return '';
-  let cleaned = url.trim().replace(/\/+$/, '');
+  let cleaned = url.trim();
+  while (cleaned.endsWith('/')) {
+    cleaned = cleaned.slice(0, -1);
+  }
   if (!/^https?:\/\//i.test(cleaned)) {
     cleaned = 'https://' + cleaned;
   }

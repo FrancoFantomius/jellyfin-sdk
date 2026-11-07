@@ -43,7 +43,7 @@ It targets both Jellyfin 10.x and Jellyfin 12.x server architectures with automa
 ## Package Metadata & Installation
 
 - **Package Name**: `@francofantomius/jellyfin`
-- **Version**: `0.4.1`
+- **Version**: `0.4.2`
 - **Runtime Support**: Node.js 18+, Bun, Deno, modern web browsers
 - **Module Formats**: Native ESM (`dist/index.js`), CommonJS (`dist/index.cjs`), TypeScript Declarations (`dist/index.d.ts`)
 - **Dependencies**: 0 production dependencies (zero bloat)

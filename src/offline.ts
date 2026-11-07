@@ -127,7 +127,7 @@ export class OfflineStorageManager {
         request.onerror = () => resolve(null);
       });
     } catch (err) {
-      console.warn(`[Jellyfin Offline] getDownloadedRecord error for ${id}:`, err);
+      console.warn('[Jellyfin Offline] getDownloadedRecord error for %s:', id, err);
       return null;
     }
   }

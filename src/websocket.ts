@@ -205,7 +205,7 @@ export class WebSocketModule {
         try {
           listener(...args);
         } catch (e) {
-          console.error(`[Jellyfin SDK] WebSocket listener error on '${event}':`, e);
+          console.error("[Jellyfin SDK] WebSocket listener error on '%s':", event, e);
         }
       });
     }

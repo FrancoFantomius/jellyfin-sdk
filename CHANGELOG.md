@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] - 2026-11-07
+
+### Changed
+- **Official Production Release**:
+  - Exited beta phase; marked project as stable and ready for general production usage.
+- **Robust URL Trailing Slash Trimming**:
+  - Refactored `cleanUrl()` in `src/http.ts` from regular-expression-based end trimming to iterative suffix removal (`while (cleaned.endsWith('/'))`), eliminating polynomial regex backtracking risks and ensuring deterministic URL normalization.
+- **Structured Error and Warning Logging**:
+  - Replaced string template interpolation with format specifiers (`%s`) in console error and warning logs across `src/client.ts`, `src/websocket.ts`, and `src/offline.ts` for cleaner log emission in Node.js and browser developer tools.
+- **Client Version**:
+  - Bumped default `clientInfo.version` in `JellyfinClient` to `0.4.2`.
+
+### Maintenance
+- Upgraded devDependencies (`@types/node`, `tsup`, `typescript`, `vitest`).
+
 ## [0.4.1] - 2026-09-10
 
 ### Fixed

@@ -64,7 +64,7 @@ export class JellyfinClient {
 
     this.clientInfo = {
       name: options.clientInfo?.name || '@francofantomius/jellyfin',
-      version: options.clientInfo?.version || '0.4.1',
+      version: options.clientInfo?.version || '0.4.2',
       device: options.clientInfo?.device || (typeof window !== 'undefined' ? 'Web Browser' : 'Node.js'),
       deviceId: options.clientInfo?.deviceId || generateDeviceId()
     };
@@ -211,7 +211,7 @@ export class JellyfinClient {
         try {
           fn(...args);
         } catch (e) {
-          console.error(`[Jellyfin SDK] Event handler error on '${event}':`, e);
+          console.error("[Jellyfin SDK] Event handler error on '%s':", event, e);
         }
       });
     }

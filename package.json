@@ -1,6 +1,6 @@
 {
   "name": "@francofantomius/jellyfin",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "A lightweight, modular, and type-safe Jellyfin SDK for Node.js and the Browser.",
   "author": "Franco Fantomius",
   "license": "MIT",
@@ -48,9 +48,9 @@
     "clean": "git clean -fdX"
   },
   "devDependencies": {
-    "@types/node": "^22.13.1",
-    "tsup": "^8.5.1",
-    "typescript": "^6.0.3",
-    "vitest": "^5.0.0"
+    "@types/node": "^26.6.6",
+    "tsup": "^9.0.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
   }
 }
